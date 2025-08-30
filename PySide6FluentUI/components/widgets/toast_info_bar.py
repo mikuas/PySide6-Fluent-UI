@@ -4,7 +4,7 @@ from typing import Union, List
 
 from PySide6.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer, QObject, QEvent, Signal, QEasingCurve
 from PySide6.QtGui import QPainter, QColor, QFont
-from PySide6.QtWidgets import QFrame,  QGraphicsOpacityEffect, QWidget, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QFrame,  QGraphicsOpacityEffect, QWidget, QVBoxLayout, QHBoxLayout, QGraphicsDropShadowEffect
 
 from .button import TransparentToolButton
 from .label import BodyLabel
@@ -15,9 +15,9 @@ from ...common.font import setFont
 
 class ToastInfoBarColor(Enum):
     """ toast infoBar color """
-    SUCCESS = '#3EC870'
+    SUCCESS = '#0F7B0F'
     ERROR = '#BC0E11'
-    WARNING = '#FFEB3B'
+    WARNING = '#FCE100'
     INFO = '#2196F3'
 
     def __new__(cls, color):
@@ -78,25 +78,21 @@ class ToastInfoBar(QFrame):
             self.textLayout: QVBoxLayout = QVBoxLayout()
             self.widgetLayout: QVBoxLayout = QVBoxLayout()
 
-        self.opacityEffect: QGraphicsOpacityEffect = QGraphicsOpacityEffect(self)
-        self.opacityEffect.setOpacity(1)
-        self.setGraphicsEffect(self.opacityEffect)
-        
-        self.__opacityAni: QPropertyAnimation = QPropertyAnimation(self.opacityEffect, b'opacity', self)
         self.__posAni: QPropertyAnimation = QPropertyAnimation(self, b'pos')
         self.__posAni.setEasingCurve(QEasingCurve.OutQuad)
-        
+        self.__posAni.setDuration(200)
+
         self._adjustText()
         self.__initWidget()
+        self.__initShadowEffect()
         self.manager: ToastInfoBarManager = ToastInfoBarManager.get(self.position)
-
         
     def __initWidget(self):
         self.closeButton.setFixedSize(36, 36)
         self.closeButton.setIconSize(QSize(15, 15))
         self.closeButton.setCursor(Qt.PointingHandCursor)
         self.closeButton.setVisible(self.isCloseable)
-        self.closeButton.clicked.connect(self.__createOpacityAni)
+        self.closeButton.clicked.connect(self.close)
 
         setFont(self.titleLabel, 16, QFont.DemiBold)
         setFont(self.contentLabel)
@@ -131,18 +127,17 @@ class ToastInfoBar(QFrame):
         self.hBoxLayout.addSpacing(12)
         self.hBoxLayout.addWidget(self.closeButton, 0, Qt.AlignTop | Qt.AlignLeft)
 
-    def _createPosAni(self):
-        self.__posAni.setDuration(200)
+    def __initShadowEffect(self):
+        self.shadowEffect: QGraphicsDropShadowEffect = QGraphicsDropShadowEffect(self)
+        self.shadowEffect.setBlurRadius(18)
+        self.shadowEffect.setOffset(0, 0)
+        self.shadowEffect.setColor(QColor(0, 0, 0, 128))
+        self.setGraphicsEffect(self.shadowEffect)
+
+    def _execPosAnimation(self):
         self.__posAni.setStartValue(self.startPosition)
         self.__posAni.setEndValue(self.endPosition)
         self.__posAni.start()
-
-    def __createOpacityAni(self):
-        self.__opacityAni.setDuration(300)
-        self.__opacityAni.setStartValue(1.0)
-        self.__opacityAni.setEndValue(0.0)
-        self.__opacityAni.finished.connect(self.close)
-        self.__opacityAni.start()
 
     def _adjustText(self):
         width = self.parent().width() / 1.5
@@ -261,10 +256,10 @@ class ToastInfoBar(QFrame):
         self.manager.add(self)
         self.startPosition = self.manager._slideStartPos(self)
         self.endPosition = self.manager._slideEndPos(self)
-        self._createPosAni()
+        self._execPosAnimation()
 
         if self.duration >= 0:
-            QTimer.singleShot(self.duration, self.__createOpacityAni)
+            QTimer.singleShot(self.duration, self.close)
 
     def closeEvent(self, event):
         self.manager.remove(self)
@@ -289,7 +284,7 @@ class ToastInfoBar(QFrame):
         painter.setBrush(self.toastColor)
         painter.drawRoundedRect(0, 0, self.width() - 0.1, self.height() - 4, 8, 8)
 
-        c = self.backgroundColor or (QColor("#323232") if isDarkTheme() else QColor("#ECECEC"))
+        c = self.backgroundColor or (QColor("#323232") if isDarkTheme() else QColor("#FFFFFF"))
         painter.setBrush(c)
         painter.drawRoundedRect(0, 5, self.width(), self.height() - 5, 6, 6)
 
@@ -334,7 +329,7 @@ class ToastInfoBarManager(QObject):
         for bar in self.toastInfoBars:
             # print(f"For ObjectName: {bar.objectName()}")
             bar.startPosition, bar.endPosition = bar.pos(), self._slideEndPos(bar)
-            bar._createPosAni()
+            bar._execPosAnimation()
         # print("\n")
 
     @classmethod

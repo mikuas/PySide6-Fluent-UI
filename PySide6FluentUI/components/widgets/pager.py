@@ -7,6 +7,7 @@ from .button import TransparentToolButton
 from ...common.icon import FluentIcon
 from ...common.color import themeColor, isDarkTheme
 from .label import BodyLabel
+from .tool_tip import setToolTipInfos, ToolTipPosition
 from .line_edit import LineEdit
 
 
@@ -67,6 +68,14 @@ class Pager(QWidget):
         self.__connectSignalSlot()
         self.__updateButtons()
 
+        setToolTipInfos(
+            [self.topButton, self.bottomButton, self.previousButton, self.nextButton],
+            ["跳转到第一页", "跳转到最后一页", "上一页", "下一页"],
+            200,
+            ToolTipPosition.TOP
+        )
+        self.currentPageChanged.connect(lambda page: self.jumpEdit.setText(str(page)))
+
     def __initWidget(self):
         self.topLabel: BodyLabel = BodyLabel("...")
         self.topLabel.setFixedWidth(20)
@@ -86,7 +95,8 @@ class Pager(QWidget):
         self.countLabel: BodyLabel = BodyLabel(f"页 共计 {self.__pages} 页")
 
         self.jumpEdit: LineEdit = LineEdit(self)
-        self.jumpEdit.setFixedWidth(50)
+        self.jumpEdit.setAlignment(Qt.AlignCenter)
+        self.jumpEdit.setFixedWidth(64)
 
     def __jumpToTop(self):
         if self.__pages >= 1:

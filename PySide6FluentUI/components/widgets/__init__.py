@@ -61,9 +61,11 @@ from .stacked_widget import PopUpAniStackedWidget, OpacityAniStackedWidget
 from .progress_bar import ProgressBar, IndeterminateProgressBar
 from .progress_ring import ProgressRing, IndeterminateProgressRing
 from .tree_view import TreeView, TreeWidget, TreeItemDelegate
-from .round_list_widget import RoundListWidget, RoundListWidgetItemDelegate
+from .round_list_widget import RoundListWidget, RoundListWidgetItemDelegate, RoundListView
 from .multi_selection_combo_box import (
     MultiSelectionListItem, MultiSelectionItem, MultiSelectionListWidget, MultiSelectionItemCheckBox, MultiSelectionComboBox
 )
-from .drop_down_color_palette import DropDownColorPalette, ColorPalette, DefaultColorPaletteItem, ColorPaletteItem, StandardItem
+from .drop_down_color_palette import StandardItem, ColorItem, DefaultColorPaletteItem, DropDownColorPalette
 from .pin_box import PinBox, PinBoxLineEdit
+from .popup_view import PopupView
+from .screen_color_picker import ScreenColorPicker, ScreenColorPickerView

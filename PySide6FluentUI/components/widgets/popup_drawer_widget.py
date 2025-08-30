@@ -66,7 +66,7 @@ class PopupDrawerWidget(QFrame):
 
     def __initShadowEffect(self):
         self._shadow = QGraphicsDropShadowEffect(self)
-        self._shadow.setBlurRadius(24)
+        self._shadow.setBlurRadius(18)
         self._shadow.setOffset(0, 0)
         self._shadow.setColor(QColor(0, 0, 0, 128))
         self.setGraphicsEffect(self._shadow)
@@ -109,9 +109,9 @@ class PopupDrawerWidget(QFrame):
         self.__tl, self.__tr, self.__br, self.__bl = tl, tr, br, bl
         self.update()
 
-    def setBackgroundColor(self, lightColor: QColor | str, darkColor: QColor | str):
-        self.__lightBgcColor = QColor(lightColor)
-        self.__darkBgcColor = QColor(darkColor)
+    def setBackgroundColor(self, lightColor: QColor, darkColor: QColor):
+        self.__lightBgcColor = lightColor
+        self.__darkBgcColor = darkColor
         self.update()
 
     def getBackgroundColor(self):
@@ -182,12 +182,12 @@ class TopPopDrawerManager(PopDrawerManager):
     def newGeometry(self, isPop):
         height = self.popDrawer.height()
         width = self.parent.width()
-        return (0, 0, width, height) if isPop else (0, -height, width, height)
+        return (0, 0, width, height) if isPop else (0, -height - 20, width, height)
 
     def getEndRectValue(self, isPop):
         height = self.popDrawer.height()
         width = self.parent.width()
-        return QRect(0, -height, width, height) if not isPop else QRect(0, 0, width, height)
+        return QRect(0, -height - 20, width, height) if not isPop else QRect(0, 0, width, height)
 
     @property
     def geometry(self):
@@ -201,13 +201,13 @@ class BottomTopDrawerManager(PopDrawerManager):
         width = self.parent.width()
         height = self.popDrawer.height()
         parentHeight = self.parent.height()
-        return (0, parentHeight - height, width, height) if isPop else (0, parentHeight, width, height)
+        return (0, parentHeight - height, width, height) if isPop else (0, parentHeight + 20, width, height)
 
     def getEndRectValue(self, isPop):
         width = self.parent.width()
         height = self.popDrawer.height()
         parentHeight = self.parent.height()
-        return QRect(0, parentHeight, width, height) if not isPop else QRect(0, parentHeight - height, width, height)
+        return QRect(0, parentHeight + 20, width, height) if not isPop else QRect(0, parentHeight - height, width, height)
 
     @property
     def geometry(self):
@@ -222,12 +222,12 @@ class LeftPopDrawerManager(PopDrawerManager):
     def newGeometry(self, isPop):
         width = self.popDrawer.width()
         height = self.parent.height()
-        return (0, 0, width, height) if isPop else (-width, 0, width, height)
+        return (0, 0, width, height) if isPop else (-width - 20, 0, width, height)
 
     def getEndRectValue(self, isPop):
         width = self.popDrawer.width()
         height = self.parent.height()
-        return QRect(-width, 0, width, height) if not isPop else QRect(0, 0, width, height)
+        return QRect(-width - 20, 0, width, height) if not isPop else QRect(0, 0, width, height)
 
     @property
     def geometry(self):
@@ -241,13 +241,13 @@ class RightPopDrawerManager(PopDrawerManager):
         width = self.popDrawer.width()
         parentWidth = self.parent.width()
         parentHeight = self.parent.height()
-        return (parentWidth - width, 0, width, parentHeight) if isPop else (parentWidth, 0, width, parentHeight)
+        return (parentWidth - width, 0, width, parentHeight) if isPop else (parentWidth + 20, 0, width, parentHeight)
 
     def getEndRectValue(self, isPop):
         width = self.popDrawer.width()
         parentWidth = self.parent.width()
         parentHeight = self.parent.height()
-        return QRect(parentWidth, 0, width, parentHeight) if not isPop else QRect(parentWidth - width, 0, width, parentHeight)
+        return QRect(parentWidth + 20, 0, width, parentHeight) if not isPop else QRect(parentWidth - width, 0, width, parentHeight)
 
     @property
     def geometry(self):

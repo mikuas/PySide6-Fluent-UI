@@ -34,7 +34,7 @@ class SlidingWidget(QWidget):
         self.setIcon(icon)
 
     def _adjustSize(self, size=0) -> None:
-        self.setMinimumSize(self._fontMetrics.horizontalAdvance(self._text) + 32 + size, 35)
+        self.setMinimumSize(self._fontMetrics.horizontalAdvance(self._text) + 12 + size, 35)
 
     def enterEvent(self, event) -> None:
         super().enterEvent(event)
@@ -210,7 +210,7 @@ class SlidingNavigationBar(SingleDirectionScrollArea):
         y = pos.y()
         width = item.width()
         height = item.height()
-        return QPoint(x + width / 2 - self.__slideLineWidth / 2, y + height + 5)
+        return QPoint(x + width / 2 - self.__slideLineWidth / 2, y + height)
 
     def __createPosAni(self, item: SlidingWidget) -> None:
         self.__posAni.setDuration(200)

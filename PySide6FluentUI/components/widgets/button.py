@@ -1121,7 +1121,7 @@ class RoundButtonBase: # New
         self.update()
 
     def sizeHint(self):
-        return super().sizeHint() + QSize(15, 0)
+        return super().sizeHint() + QSize(48, 0)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -1140,11 +1140,15 @@ class RoundButtonBase: # New
         self.setFixedHeight(35)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-    def _drawBorder(self, painter: QPainter, rect: QRect) -> QColor:
-        color = QColor(255, 255, 255, 32) if isDarkTheme() else QColor(0, 0, 0, 32)
-        pen = QPen(self.borderColor() or color)
+    def _drawBorder(self, painter: QPainter, rect: QRect) -> int:
+        if isDarkTheme():
+            pc, bc = 255, 32
+        else:
+            pc, bc = 0, 255
+        pen = QPen(self.borderColor() or QColor(pc, pc, pc, 32))
         pen.setWidthF(1.5)
         painter.setPen(pen)
+        painter.setBrush(QColor(bc, bc, bc))
         if not self.isEnabled():
             painter.setOpacity(0.3628)
         elif self.isPressed:
@@ -1152,7 +1156,7 @@ class RoundButtonBase: # New
         else:
             painter.setOpacity(1.0)
         drawRoundRect(painter, rect.adjusted(1, 1, -1, -1), *self.roundRadius())
-        return color
+        return pc
 
     def _drawIcon(self, painter: QPainter, rect: QRect) -> Tuple[QRect, Qt.AlignmentFlag]:
         size = self.iconSize().width()
@@ -1165,9 +1169,8 @@ class RoundButtonBase: # New
         rect.adjust(x + size + 6, 0, 0, 0)
         return rect, Qt.AlignVCenter
 
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag) -> None:
-        color.setAlpha(255)
-        painter.setPen(color)
+    def _drawText(self, painter: QPainter, color: int, rect: QRect, alignment: Qt.AlignmentFlag) -> None:
+        painter.setPen(QColor(color, color, color))
         painter.drawText(rect, alignment, self.text())
 
 
@@ -1207,7 +1210,7 @@ class FillButtonBase(RoundButtonBase): # New
         painter = QPainter(self)
         rect = self.rect()
         painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
-        color = QColor(0, 0, 0) if isDarkTheme() and self.isEnabled() else QColor(255, 255, 255)
+        color = 0 if isDarkTheme() and self.isEnabled() else 255
         alignment = Qt.AlignCenter
         self._drawBackground(painter)
         if not self.icon().isNull():
@@ -1338,6 +1341,11 @@ class OutlineButtonBase: # New
             painter.setOpacity(1.0)
         drawRoundRect(painter, rect.adjusted(1, 1, -1, -1), *self.roundRadius())
         return color
+
+    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag) -> None:
+        color.setAlpha(255)
+        painter.setPen(color)
+        painter.drawText(rect, alignment, self.text())
 
 
 class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New

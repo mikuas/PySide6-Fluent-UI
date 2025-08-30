@@ -1,9 +1,9 @@
 # coding:utf-8
 from typing import List, Union
 
-from PySide6.QtGui import QFont, Qt, QPainter, QColor, QPen, QIcon
-from PySide6.QtCore import QSize, QRect, QRectF
-from PySide6.QtWidgets import QStyle, QListWidget, QListWidgetItem, QStyledItemDelegate
+from PySide6.QtGui import QFont, Qt, QPainter, QColor, QPen
+from PySide6.QtCore import QSize, QRect
+from PySide6.QtWidgets import QStyle, QListWidget, QListWidgetItem, QStyledItemDelegate, QListView
 
 from ...common.color import themeColor, isDarkTheme
 from ..widgets.scroll_area import SmoothScrollDelegate
@@ -51,8 +51,9 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
         pen.setWidthF(1.4)
         if option.state & (QStyle.StateFlag.State_Selected | QStyle.StateFlag.State_MouseOver):
             pen.setColor(self._borderColor or themeColor())
-            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#323232") if isDark else QColor("#E5E7EA"))
+            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2a2a2a") if isDark else QColor("#ebedf1"))
         else:
+            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2b2b2b") if isDark else QColor("#fafbfc"))
             pen.setColor(QColor("#3A3A3A") if isDark else QColor("#D7D6D6"))
         painter.setPen(pen)
         painter.drawRoundedRect(rect, 8, 8)
@@ -81,8 +82,8 @@ class RoundListWidget(QListWidget):
         RoundListWidget
         """
         super().__init__(parent)
-        self.__items: List[QListWidgetItem] = []       # type: List[QListWidgetItem]
-        self.__oldItem: QListWidgetItem = None   # type: QListWidgetItem
+        self.__items: List[QListWidgetItem] = []
+        self.__oldItem: QListWidgetItem = None
         self.itemDelegate: RoundListWidgetItemDelegate = RoundListWidgetItemDelegate(self)
         self.scrollDelegate: SmoothScrollDelegate = SmoothScrollDelegate(self)
 
@@ -90,9 +91,6 @@ class RoundListWidget(QListWidget):
         self.setSpacing(2)
         self.setItemDelegate(self.itemDelegate)
         self.setStyleSheet("RoundListWidget {background: transparent; border: none;}")
-        # self.setStyleSheet(
-        #     "RoundListWidget {background-color: #1E1E1E;}" if isDarkTheme() else "RoundListWidget {background-color: #F1F1F1;}"
-        # )
 
     def __onDoubleItem(self, item):
         self.openPersistentEditor(item)
@@ -145,3 +143,15 @@ class RoundListWidget(QListWidget):
     def insertItems(self, row, items: Union[List[str,], List[QListWidgetItem]]):
         for item in items:
             self.insertItem(row, item)
+
+
+class RoundListView(QListView):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.itemDelegate: RoundListWidgetItemDelegate = RoundListWidgetItemDelegate(self)
+        self.scrollDelegate: SmoothScrollDelegate = SmoothScrollDelegate(self)
+
+        self.setItemDelegate(self.itemDelegate)
+        self.setMouseTracking(True)
+        self.setStyleSheet("RoundListView {background: transparent; border: none;")

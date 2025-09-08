@@ -1,5 +1,5 @@
 # coding:utf-8
-from typing import Union
+from typing import Union, List
 
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QButtonGroup, QAbstractButton, QLayout
 from PySide6.QtGui import QColor, QPainter
@@ -133,16 +133,20 @@ class ColorItem(DefaultColorPaletteItem):
 class DropDownColorPalette(QWidget):
     colorChanged = Signal(QColor)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, colors=[
+        QColor("#FFFFFF"), QColor("#FF0000"), QColor("#00BFFF"), QColor("#00FF7F"), QColor("#FF00FF"),
+        QColor("#8A2BE2"), QColor("#A5A5A5"), QColor("#FFC000"), QColor("#EE9A00"), QColor("#70AD47")]):
         super().__init__(parent)
         parent.installEventFilter(self)
-        from PySide6FluentUI import ColorDialog
+        from ..dialog_box import ColorDialog
         self.__currentColor: QColor = None
         self.__lastButton: ColorItem = None
+        self.__colors: List[QColor] = colors
         self.widgetLayout: QHBoxLayout = QHBoxLayout(self)
         self.colorPaletteView: PopupView = PopupView(self)
-        self.colorPaletteView.setFixedSize(346, 400)
+        self.colorPaletteView.setFixedSize(346, 414)
         self.__initColorPaletteView()
+        self.setMouseTracking(True)
 
         self.colorItem: StandardItem = StandardItem(self.defaultColor(), self)
         self.dropDownButton: TransparentToolButton = TransparentToolButton(FluentIcon.CHEVRON_DOWN_MED, self)
@@ -150,21 +154,22 @@ class DropDownColorPalette(QWidget):
 
         self.colorDialog.hide()
         self.colorItem.setFixedSize(26, 26)
-        self.dropDownButton.setIconSize(QSize(14, 14))
-        self.widgetLayout.setContentsMargins(6, 6, 6, 6)
+        self.dropDownButton.setIconSize(QSize(12, 12))
+        self.widgetLayout.setContentsMargins(5, 5, 5, 5)
+        self.widgetLayout.setSpacing(2)
         self.widgetLayout.setSizeConstraint(QLayout.SetFixedSize)
 
         self.widgetLayout.addWidget(self.colorItem)
         self.widgetLayout.addWidget(self.dropDownButton)
         self.connectSignalSlot()
 
-        # self.setMouseTracking(True)
     def __initColorPaletteView(self):
         self.__initButtonGroup()
 
         # init default color item
-        self.defaultColorItem: DefaultColorPaletteItem = DefaultColorPaletteItem(themeColor(), "默认颜色", self.colorPaletteView)
-        self.defaultColorItem.setFixedHeight(42)
+        self.defaultColorItem: DefaultColorPaletteItem = DefaultColorPaletteItem(themeColor(), "默认颜色",
+                                                                                 self.colorPaletteView)
+        self.defaultColorItem.setFixedHeight(40)
         self.colorPaletteView.viewLayout.addWidget(self.defaultColorItem)
         self.colorPaletteView.viewLayout.addWidget(HorizontalSeparator(self))
 
@@ -172,53 +177,54 @@ class DropDownColorPalette(QWidget):
         self.themeColorLabel: BodyLabel = BodyLabel("   主题色", self.colorPaletteView)
         self.colorPaletteView.viewLayout.addWidget(self.themeColorLabel)
         self.colorPaletteView.viewLayout.addSpacing(8)
-
-        hBoxLayout = QHBoxLayout()
-        hBoxLayout.setSpacing(1)
-        hBoxLayout.setContentsMargins(5, 0, 5, 0)
-        colors = ["#1E90FF", "#FF4500", "#9ACD32", "#8A2BE2", "#FF1493", "#00CED1", "#00FF95", "#DC143C", "#8A8A8A", "#FF8C00"]
-        for i in range(10):
-            color = colors[i]
-            vBoxLayout = QVBoxLayout()
-            vBoxLayout.setSpacing(4)
-            item = ColorItem(colors[i], self)
-            vBoxLayout.addWidget(item)
-
-            self.colorButtonGroup.addButton(item)
-            for j in range(5):
-                color = QColor(color)
-                color.setAlpha(255 / (5 - j))
-                item = ColorItem(color, self)
-                vBoxLayout.addWidget(item)
-                self.colorButtonGroup.addButton(item)
-            hBoxLayout.addLayout(vBoxLayout)
-
-        self.colorPaletteView.viewLayout.addLayout(hBoxLayout)
-        self.colorPaletteView.viewLayout.addSpacing(10)
-        self.colorPaletteView.viewLayout.addWidget(HorizontalSeparator(self))
+        self.__buildThemeColor()
 
         # init standard color
         self.standardColorLabel: BodyLabel = BodyLabel("   标准颜色", self.colorPaletteView)
         self.colorPaletteView.viewLayout.addWidget(self.standardColorLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.colorPaletteView.viewLayout.addSpacing(8)
+        self.__buildBaseColor()
 
+        self.customColorButton: TransparentPushButton = TransparentPushButton(FluentIcon.PALETTE, "更多颜色")
+        self.customColorButton.setFixedHeight(40)
+        self.colorPaletteView.viewLayout.addWidget(self.customColorButton)
+
+    def __buildThemeColor(self):
+        self.themeColorLayout: QHBoxLayout = QHBoxLayout()
+        self.themeColorLayout.setSpacing(1)
+        self.themeColorLayout.setContentsMargins(5, 0, 5, 0)
+
+        for color in self.__colors:
+            vBoxLayout = QVBoxLayout()
+            vBoxLayout.setSpacing(4)
+            item = ColorItem(color, self)
+            vBoxLayout.addWidget(item)
+            vBoxLayout.addSpacing(5)
+
+            self.colorButtonGroup.addButton(item)
+            for _c_ in self.colorScale(color):
+                item = ColorItem(_c_, self)
+                vBoxLayout.addWidget(item)
+                self.colorButtonGroup.addButton(item)
+            self.themeColorLayout.addLayout(vBoxLayout)
+
+        self.colorPaletteView.viewLayout.addLayout(self.themeColorLayout)
+        self.colorPaletteView.viewLayout.addSpacing(10)
+        self.colorPaletteView.viewLayout.addWidget(HorizontalSeparator(self))
+
+    def __buildBaseColor(self):
         hBoxLayout = QHBoxLayout()
         hBoxLayout.setSpacing(0)
         hBoxLayout.setContentsMargins(4, 0, 5, 0)
-        colors = ["#FF0000", "#0000FF", "#008000", "#FFFF00", "#00FFFF", "#FF00FF", "#000000", "#FFFFFF", "#FFA500", "#800080"]
 
-        for color in colors:
-            item = ColorItem(color, self)
+        for _h in [36 * _ for _ in range(10)]:
+            item = ColorItem(QColor.fromHsv(_h, 255, 255), self)
             hBoxLayout.addWidget(item)
             self.colorButtonGroup.addButton(item)
         self.colorPaletteView.viewLayout.addLayout(hBoxLayout)
 
         self.colorPaletteView.viewLayout.addSpacing(10)
         self.colorPaletteView.viewLayout.addWidget(HorizontalSeparator(self))
-
-        self.customColorButton: TransparentPushButton = TransparentPushButton(FluentIcon.PALETTE, "更多颜色")
-        self.customColorButton.setFixedHeight(42)
-        self.colorPaletteView.viewLayout.addWidget(self.customColorButton)
 
     def __initButtonGroup(self):
         self.colorButtonGroup: QButtonGroup = QButtonGroup(self)
@@ -247,6 +253,14 @@ class DropDownColorPalette(QWidget):
             self.colorChanged.emit(color)
             self.__currentColor = color
 
+    def colorScale(self, base: QColor, steps=5):
+        colors = []
+        for i in range(1, steps + 1):
+            # factor = 100 + (i * 24)
+            factor = 100 + (i * 16)
+            colors.append(base.darker(factor))
+        return colors
+
     def updateItem(self, button: ColorItem) -> Union[QColor, bool]:
         if self.__lastButton and button != self.__lastButton:
             self.__lastButton.isHover = False
@@ -259,6 +273,12 @@ class DropDownColorPalette(QWidget):
             color = QColor()
         self.__lastButton = button
         return button.color() if button.color() != color else False
+
+    def setColors(self, colors: List[QColor]):
+        if len(colors) != 10:
+            return
+        self.__colors = colors
+        self.__buildThemeColor()
 
     def setDefaultColor(self, color: Union[str, QColor]) -> None:
         self.defaultColorItem.setColor(color)

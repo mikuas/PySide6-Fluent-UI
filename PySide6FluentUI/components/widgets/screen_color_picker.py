@@ -102,7 +102,7 @@ class ScreenColorPicker(QWidget):
         self.colorPickerView.connectSignalSlot(self.stop)
 
     def __initLayout(self):
-        self.hBoxLayout.setContentsMargins(5, 3, 5, 3)
+        self.hBoxLayout.setContentsMargins(5, 4, 5, 4)
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setSizeConstraint(QLayout.SetFixedSize)
         self.hBoxLayout.addWidget(self.colorItem)

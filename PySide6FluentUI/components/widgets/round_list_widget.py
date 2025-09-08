@@ -154,4 +154,5 @@ class RoundListView(QListView):
 
         self.setItemDelegate(self.itemDelegate)
         self.setMouseTracking(True)
-        self.setStyleSheet("RoundListView {background: transparent; border: none;")
+        self.setSpacing(2)
+        self.setStyleSheet("RoundListView {background: transparent; border: none;}")

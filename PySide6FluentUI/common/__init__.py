@@ -4,7 +4,7 @@ from .auto_wrap import TextWrap
 from .icon import Action, Icon, getIconColor, drawSvgIcon, FluentIcon, drawIcon, FluentIconBase, writeSvg, \
     FluentFontIconBase
 from .style_sheet import (
-    setStyleSheet, getStyleSheet, setTheme, ThemeColor, themeColor,setThemeColor, applyThemeColor, FluentStyleSheet,
+    setStyleSheet, getStyleSheet, setTheme, ThemeColor, themeColor, setThemeColor, applyThemeColor, FluentStyleSheet,
     StyleSheetBase, StyleSheetFile, StyleSheetCompose, CustomStyleSheet, toggleTheme, setCustomStyleSheet
 )
 from .draw_round_rect import drawRoundRect

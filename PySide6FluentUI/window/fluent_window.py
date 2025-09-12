@@ -343,7 +343,7 @@ class TopNavigationWindow(FluentWindowBase):
         self.widgetLayout.setSpacing(0)
         self.widgetLayout.setContentsMargins(0, 35, 0, 0)
 
-        self.widgetLayout.addWidget(self.navigationInterface,0, Qt.AlignTop)
+        self.widgetLayout.addWidget(self.navigationInterface, 0, Qt.AlignTop)
         self.widgetLayout.addSpacing(10)
         self.widgetLayout.addWidget(self.stackedWidget, 1)
         

@@ -3,7 +3,7 @@ from typing import Union, List
 
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QButtonGroup, QAbstractButton, QLayout
 from PySide6.QtGui import QColor, QPainter
-from PySide6.QtCore import Qt, QPoint, QRectF, QEvent, Signal, QSize, QRect
+from PySide6.QtCore import Qt, QPoint, QRectF, Signal, QSize, QRect
 
 from .popup_view import PopupView
 from .button import TransparentToolButton, TransparentPushButton
@@ -14,20 +14,22 @@ from ...common.icon import FluentIcon
 from ...common.font import getFont
 
 
-class StandardItem(QAbstractButton):
+class BaseItem(QAbstractButton):
 
     def __init__(self, color: Union[str, QColor], parent=None):
         super().__init__(parent)
-        self.setColor(color)
+        self.__color = QColor(color) if isinstance(color, str) else color
 
     def setColor(self, color: Union[str, QColor]) -> None:
         if isinstance(color, str):
             color = QColor(color)
-        self._color = color
+        if self.__color == color:
+            return
+        self.__color = color
         self.update()
 
     def color(self) -> QColor:
-        return self._color
+        return self.__color
 
     def paintEvent(self, e):
         painter = QPainter(self)
@@ -37,7 +39,7 @@ class StandardItem(QAbstractButton):
         painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 6, 6)
 
 
-class DefaultColorPaletteItem(StandardItem):
+class DefaultColorPaletteItem(BaseItem):
 
     def __init__(self, color: Union[str, QColor], text: str, parent: QWidget = None):
         super().__init__(color, parent)
@@ -66,7 +68,7 @@ class DefaultColorPaletteItem(StandardItem):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(self._color)
+        painter.setBrush(self.color())
 
         margin = self.height() / 5
         rect = QRectF(margin, margin, 24, 24)
@@ -80,6 +82,7 @@ class DefaultColorPaletteItem(StandardItem):
             painter.setBrush(QColor(c, c, c, 32))
             painter.drawRoundedRect(rect, 4, 4)
 
+        # draw text
         if self.text():
             painter.setFont(getFont())
             c = 255 if isDark else 0
@@ -130,45 +133,73 @@ class ColorItem(DefaultColorPaletteItem):
         painter.drawRoundedRect(rect, 3.7, 3.7)
 
 
-class DropDownColorPalette(QWidget):
+class ColorView(QWidget):
     colorChanged = Signal(QColor)
 
-    def __init__(self, parent=None, colors=[
-        QColor("#FFFFFF"), QColor("#FF0000"), QColor("#00BFFF"), QColor("#00FF7F"), QColor("#FF00FF"),
-        QColor("#8A2BE2"), QColor("#A5A5A5"), QColor("#FFC000"), QColor("#EE9A00"), QColor("#70AD47")]):
+    def __init__(self, defaultColor=QColor(255, 255, 255), parent=None):
         super().__init__(parent)
-        parent.installEventFilter(self)
-        from ..dialog_box import ColorDialog
-        self.__currentColor: QColor = None
-        self.__lastButton: ColorItem = None
-        self.__colors: List[QColor] = colors
+        self.__currentColor: QColor = defaultColor
+        self.colorItem: BaseItem = BaseItem(defaultColor, self)
         self.widgetLayout: QHBoxLayout = QHBoxLayout(self)
-        self.colorPaletteView: PopupView = PopupView(self)
-        self.colorPaletteView.setFixedSize(346, 414)
-        self.__initColorPaletteView()
-        self.setMouseTracking(True)
+        self.pickerColorButton: TransparentToolButton = TransparentToolButton(self)
 
-        self.colorItem: StandardItem = StandardItem(self.defaultColor(), self)
-        self.dropDownButton: TransparentToolButton = TransparentToolButton(FluentIcon.CHEVRON_DOWN_MED, self)
-        self.colorDialog: ColorDialog = ColorDialog(self.defaultColor(), "选择颜色", self.window())
-
-        self.colorDialog.hide()
         self.colorItem.setFixedSize(26, 26)
-        self.dropDownButton.setIconSize(QSize(12, 12))
+        self.__initLayout()
+
+    def __initLayout(self):
         self.widgetLayout.setContentsMargins(5, 5, 5, 5)
         self.widgetLayout.setSpacing(2)
         self.widgetLayout.setSizeConstraint(QLayout.SetFixedSize)
 
         self.widgetLayout.addWidget(self.colorItem)
-        self.widgetLayout.addWidget(self.dropDownButton)
+        self.widgetLayout.addWidget(self.pickerColorButton)
+
+    def setDefaultColor(self, color: Union[str, QColor]):
+        self.colorItem.setColor(color)
+
+    def setCurrentColor(self, color: Union[str, QColor]):
+        self.__currentColor = color
+
+    def currentColor(self) -> QColor:
+        return self.__currentColor
+
+    def connectSignalSlot(self): ...
+
+    def exec(self): ...
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        c = 255 if isDarkTheme() else 0
+        painter.setPen(QColor(c, c, c, 32))
+        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)
+
+
+class DropDownColorPalette(ColorView):
+
+    def __init__(self, parent=None, colors=[
+        QColor("#FFFFFF"), QColor("#FF0000"), QColor("#00BFFF"), QColor("#00FF7F"), QColor("#FF00FF"),
+        QColor("#8A2BE2"), QColor("#A5A5A5"), QColor("#FFC000"), QColor("#EE9A00"), QColor("#70AD47")]):
+        super().__init__(parent=parent)
+        from ..dialog_box import ColorDialog
+        self.__lastButton: ColorItem = None
+        self.__colors: List[QColor] = colors
+        self.colorPaletteView: PopupView = PopupView(self)
+
+        self.colorPaletteView.setFixedSize(346, 414)
+        self.pickerColorButton.setIcon(FluentIcon.CHEVRON_DOWN_MED)
+        self.pickerColorButton.setIconSize(QSize(12, 12))
+        self.__initColorPaletteView()
+
+        self.colorDialog: ColorDialog = ColorDialog(self.defaultColor(), "选择颜色", self.window())
+        self.colorDialog.hide()
         self.connectSignalSlot()
 
     def __initColorPaletteView(self):
         self.__initButtonGroup()
 
         # init default color item
-        self.defaultColorItem: DefaultColorPaletteItem = DefaultColorPaletteItem(themeColor(), "默认颜色",
-                                                                                 self.colorPaletteView)
+        self.defaultColorItem: DefaultColorPaletteItem = DefaultColorPaletteItem(themeColor(), "默认颜色", self.colorPaletteView)
         self.defaultColorItem.setFixedHeight(40)
         self.colorPaletteView.viewLayout.addWidget(self.defaultColorItem)
         self.colorPaletteView.viewLayout.addWidget(HorizontalSeparator(self))
@@ -234,9 +265,9 @@ class DropDownColorPalette(QWidget):
         self.colorButtonGroup.setId(self.__defaultButton, 0)
 
     def __updateSelectedColor(self, color: QColor):
-        self.colorChanged.emit(color)
-        self.__currentColor = color
+        self.setCurrentColor(color)
         self.colorItem.setColor(color)
+        self.colorChanged.emit(color)
         self.__lastButton = None
         self.colorButtonGroup.button(0).setChecked(True)
 
@@ -250,13 +281,12 @@ class DropDownColorPalette(QWidget):
     def __onClicked(self, item):
         color = self.updateItem(item)
         if color:
+            self.setCurrentColor(color)
             self.colorChanged.emit(color)
-            self.__currentColor = color
 
     def colorScale(self, base: QColor, steps=5):
         colors = []
         for i in range(1, steps + 1):
-            # factor = 100 + (i * 24)
             factor = 100 + (i * 16)
             colors.append(base.darker(factor))
         return colors
@@ -274,19 +304,13 @@ class DropDownColorPalette(QWidget):
         self.__lastButton = button
         return button.color() if button.color() != color else False
 
-    def setColors(self, colors: List[QColor]):
-        if len(colors) != 10:
-            return
-        self.__colors = colors
-        self.__buildThemeColor()
-
     def setDefaultColor(self, color: Union[str, QColor]) -> None:
         self.defaultColorItem.setColor(color)
-        self.colorItem.setColor(color)
-        self.__currentColor = color
+        super().setDefaultColor(color)
+        self.setCurrentColor(color)
 
     def exec(self):
-        positon = self.mapToGlobal(self.dropDownButton.geometry().center())
+        positon = self.mapToGlobal(self.pickerColorButton.geometry().center())
         x = positon.x() + self.width() // 2
         y = int(positon.y() - self.colorPaletteView.height() // 2.2)
         startPos, endPos = QPoint(x - 24, y), QPoint(x, y)
@@ -311,14 +335,6 @@ class DropDownColorPalette(QWidget):
         self.colorPaletteView.hide()
         self.colorDialog.exec()
 
-    def currentColor(self) -> QColor:
-        return self.__currentColor
-
-    def eventFilter(self, watched, event):
-        if watched != self and event.type() in [QEvent.MouseButtonPress]:
-            self.colorPaletteView.hide()
-        return super().eventFilter(watched, event)
-
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.exec()
@@ -328,13 +344,6 @@ class DropDownColorPalette(QWidget):
         self.defaultColorItem.clicked.connect(self.__onClickedDefaultColorItem)
         self.colorButtonGroup.buttonClicked.connect(self.__onClicked)
         self.customColorButton.clicked.connect(self._showColorDialog)
-        self.dropDownButton.clicked.connect(self.exec)
+        self.pickerColorButton.clicked.connect(self.exec)
         self.colorDialog.colorChanged.connect(self.__onClickedCustomColorButton)
         self.colorChanged.connect(self.colorItem.setColor)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        c = 255 if isDarkTheme() else 0
-        painter.setPen(QColor(c, c, c, 32))
-        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)

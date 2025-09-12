@@ -1,5 +1,5 @@
 # coding:utf-8
-from typing import List, Union
+from typing import Union
 
 from PySide6.QtGui import QFont, Qt, QPainter, QColor, QPen
 from PySide6.QtCore import QSize, QRect
@@ -40,6 +40,9 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
             color = QColor(color)
         self._borderColor = color
 
+    def sizeHint(self, option, index):
+        return QSize(0, 45)
+
     def paint(self, painter, option, index):
         painter.save()
 
@@ -53,8 +56,8 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
             pen.setColor(self._borderColor or themeColor())
             painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2a2a2a") if isDark else QColor("#ebedf1"))
         else:
-            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2b2b2b") if isDark else QColor("#fafbfc"))
             pen.setColor(QColor("#3A3A3A") if isDark else QColor("#D7D6D6"))
+            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2b2b2b") if isDark else QColor("#fafbfc"))
         painter.setPen(pen)
         painter.drawRoundedRect(rect, 8, 8)
 
@@ -76,29 +79,38 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
             return icon.pixmap(28, 28).width()
 
 
-class RoundListWidget(QListWidget):
+class RoundListBase:
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.itemDelegate: RoundListWidgetItemDelegate = RoundListWidgetItemDelegate(self)
+        self.scrollDelegate: SmoothScrollDelegate = SmoothScrollDelegate(self)
+
+        self.setMouseTracking(True)
+        self.setContentsMargins(24, 24, 24, 24)
+        self.setSpacing(2)
+        self.setItemDelegate(self.itemDelegate)
+
+    def setItemBorderColor(self, color: Union[str, QColor]):
+        self.itemDelegate.setBorderColor(color)
+
+
+class RoundListWidget(RoundListBase, QListWidget):
     def __init__(self, parent=None):
         """
         RoundListWidget
         """
         super().__init__(parent)
-        self.__items: List[QListWidgetItem] = []
-        self.__oldItem: QListWidgetItem = None
-        self.itemDelegate: RoundListWidgetItemDelegate = RoundListWidgetItemDelegate(self)
-        self.scrollDelegate: SmoothScrollDelegate = SmoothScrollDelegate(self)
-
-        self.setMouseTracking(True)
-        self.setSpacing(2)
-        self.setItemDelegate(self.itemDelegate)
-        self.setStyleSheet("RoundListWidget {background: transparent; border: none;}")
+        self.__editItem: QListWidgetItem = None
+        self.setStyleSheet("RoundListWidget {background: transparent; border: none; padding: 10px;}")
 
     def __onDoubleItem(self, item):
         self.openPersistentEditor(item)
-        self.__oldItem = item
+        self.__editItem = item
 
     def __onCloseEdit(self):
-        if self.__oldItem:
-            self.closePersistentEditor(self.__oldItem)
+        if self.__editItem:
+            self.closePersistentEditor(self.__editItem)
 
     def enableDoubleItemEdit(self, enable: bool):
         if enable:
@@ -108,51 +120,18 @@ class RoundListWidget(QListWidget):
             self.itemDoubleClicked.disconnect(self.__onDoubleItem)
             self.currentItemChanged.disconnect(self.__onCloseEdit)
 
-    def setItemBorderColor(self, color: Union[str, QColor]):
-        self.itemDelegate.setBorderColor(color)
-
     def setItemHeight(self, height: int):
-        for item in self.allItems():
-            item.setSizeHint(QSize(0, height))
+        for i in range(self.count()):
+            self.item(i).setSizeHint(QSize(0, height))
 
     def setItemTextAlignment(self, alignment: Qt.AlignmentFlag):
-        for item in self.allItems():
-            item.setTextAlignment(alignment)
-
-    def allItems(self):
-        return self.__items
-
-    def addItem(self, item: str | QListWidgetItem):
-        if isinstance(item, str):
-            item = QListWidgetItem(item)
-        item.setSizeHint(QSize(0, 45))
-        super().addItem(item)
-        self.__items.append(item)
-
-    def addItems(self, items: list[str] | list[QListWidgetItem]):
-        for item in items:
-            self.addItem(item)
-
-    def insertItem(self, row: int, item: str | QListWidgetItem):
-        if isinstance(item, str):
-            item = QListWidgetItem(item)
-        item.setSizeHint(QSize(0, 45))
-        self.__items.append(item)
-        super().insertItem(row, item)
-
-    def insertItems(self, row, items: Union[List[str,], List[QListWidgetItem]]):
-        for item in items:
-            self.insertItem(row, item)
+        for i in range(self.count()):
+            self.item(i).setTextAlignment(alignment)
 
 
-class RoundListView(QListView):
+class RoundListView(RoundListBase, QListView):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.itemDelegate: RoundListWidgetItemDelegate = RoundListWidgetItemDelegate(self)
-        self.scrollDelegate: SmoothScrollDelegate = SmoothScrollDelegate(self)
 
-        self.setItemDelegate(self.itemDelegate)
-        self.setMouseTracking(True)
-        self.setSpacing(2)
-        self.setStyleSheet("RoundListView {background: transparent; border: none;}")
+        self.setStyleSheet("RoundListView {background: transparent; border: none; padding: 10px;}")

@@ -85,8 +85,8 @@ class Pager(QWidget):
         self.bottomLabel.setFixedWidth(20)
         self.bottomLabel.setAlignment(Qt.AlignCenter)
 
-        self.topButton: TransparentToolButton = TransparentToolButton(FluentIcon.LEFT_ARROW, self)
-        self.bottomButton: TransparentToolButton = TransparentToolButton(FluentIcon.RIGHT_ARROW, self)
+        self.topButton: TransparentToolButton = TransparentToolButton(FluentIcon.SKIP_START_FILL, self)
+        self.bottomButton: TransparentToolButton = TransparentToolButton(FluentIcon.SKIP_END_FILL, self)
 
         self.previousButton: TransparentToolButton = TransparentToolButton(FluentIcon.CARE_LEFT_SOLID, self)
         self.nextButton: TransparentToolButton = TransparentToolButton(FluentIcon.CARE_RIGHT_SOLID, self)

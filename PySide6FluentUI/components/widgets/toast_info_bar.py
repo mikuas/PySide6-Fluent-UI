@@ -56,7 +56,6 @@ class ToastInfoBar(QFrame):
     ):
         super().__init__(parent)
         parent.installEventFilter(self)
-        self.setFrameShadow(QFrame.Shadow.Sunken)
         self.title: str = title
         self.content: str = content
         self.duration: int = duration
@@ -129,12 +128,12 @@ class ToastInfoBar(QFrame):
 
     def __initShadowEffect(self):
         self.shadowEffect: QGraphicsDropShadowEffect = QGraphicsDropShadowEffect(self)
-        self.shadowEffect.setBlurRadius(18)
-        self.shadowEffect.setOffset(0, 0)
-        self.shadowEffect.setColor(QColor(0, 0, 0, 128))
+        self.shadowEffect.setBlurRadius(24)
+        self.shadowEffect.setOffset(0, 6)
+        self.shadowEffect.setColor(QColor(0, 0, 0, 64))
         self.setGraphicsEffect(self.shadowEffect)
 
-    def _execPosAnimation(self):
+    def run(self):
         self.__posAni.setStartValue(self.startPosition)
         self.__posAni.setEndValue(self.endPosition)
         self.__posAni.start()
@@ -256,7 +255,7 @@ class ToastInfoBar(QFrame):
         self.manager.add(self)
         self.startPosition = self.manager._slideStartPos(self)
         self.endPosition = self.manager._slideEndPos(self)
-        self._execPosAnimation()
+        self.run()
 
         if self.duration >= 0:
             QTimer.singleShot(self.duration, self.close)
@@ -329,7 +328,7 @@ class ToastInfoBarManager(QObject):
         for bar in self.toastInfoBars:
             # print(f"For ObjectName: {bar.objectName()}")
             bar.startPosition, bar.endPosition = bar.pos(), self._slideEndPos(bar)
-            bar._execPosAnimation()
+            bar.run()
         # print("\n")
 
     @classmethod

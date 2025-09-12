@@ -83,7 +83,7 @@ class PinBox(QWidget):
     def setEchoMode(self, mode: QLineEdit.EchoMode):
         if mode == self.__echoMode:
             return
-        self.__echoMode == mode
+        self.__echoMode = mode
         for edit in self.__pinBoxLineEdits:
             edit.setEchoMode(mode)
         

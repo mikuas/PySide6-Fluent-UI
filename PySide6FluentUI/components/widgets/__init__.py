@@ -31,7 +31,7 @@ from .menu import (
 from .menu_bar import MenuBar
 from .info_badge import InfoBadge, InfoLevel, DotInfoBadge, IconInfoBadge, InfoBadgePosition, InfoBadgeManager
 from .scroll_area import SingleDirectionScrollArea, SmoothScrollArea, ScrollArea
-from .slider import Slider, HollowHandleStyle, ClickableSlider
+from .slider import Slider, HollowHandleStyle, ClickableSlider, ToolTipSlider
 from .spin_box import (
     SpinBox, DoubleSpinBox, DateEdit, DateTimeEdit, TimeEdit, CompactSpinBox, CompactDoubleSpinBox,
     CompactDateEdit, CompactDateTimeEdit, CompactTimeEdit
@@ -65,7 +65,8 @@ from .round_list_widget import RoundListWidget, RoundListWidgetItemDelegate, Rou
 from .multi_selection_combo_box import (
     MultiSelectionListItem, MultiSelectionItem, MultiSelectionListWidget, MultiSelectionItemCheckBox, MultiSelectionComboBox
 )
-from .drop_down_color_palette import StandardItem, ColorItem, DefaultColorPaletteItem, DropDownColorPalette
+from .drop_down_color_palette import BaseItem, ColorItem, DefaultColorPaletteItem, DropDownColorPalette
 from .pin_box import PinBox, PinBoxLineEdit
-from .popup_view import PopupView
+from .popup_view import PopupView, ContainerFrame, FrameView
 from .screen_color_picker import ScreenColorPicker, ScreenColorPickerView
+from .splitter import Splitter, SplitterHandle

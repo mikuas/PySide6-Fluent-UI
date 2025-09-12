@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="gallery">
+        <file>images/Alipay.png</file>
+        <file>images/ATRI.jpg</file>
+        <file>images/WeChat.png</file>
+        <file>icons/app.ico</file>
+    </qresource>
+</RCC>

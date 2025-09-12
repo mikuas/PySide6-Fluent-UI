@@ -1,10 +1,12 @@
 # coding:utf-8
-from PySide6.QtCore import QSize, Qt, Signal, QPoint, QRectF, QPropertyAnimation, Property, QEasingCurve
-from PySide6.QtGui import QColor, QMouseEvent, QPainter, QPainterPath
-from PySide6.QtWidgets import QProxyStyle, QSlider, QStyle, QStyleOptionSlider, QWidget
+from PySide6.QtCore import QSize, Qt, Signal, QPoint, QRectF, QPropertyAnimation, Property, QTimer
+from PySide6.QtGui import QColor, QMouseEvent, QPainter, QPainterPath, QFontMetrics
+from PySide6.QtWidgets import QProxyStyle, QSlider, QStyle, QStyleOptionSlider, QWidget, QLabel, QHBoxLayout
 
-from ...common.style_sheet import FluentStyleSheet, themeColor, isDarkTheme
+from .popup_view import FrameView
+from ...common.style_sheet import isDarkTheme, Theme
 from ...common.color import autoFallbackThemeColor
+from ...common.config import qconfig
 from ...common.overload import singledispatchmethod
 
 
@@ -312,3 +314,60 @@ class HollowHandleStyle(QProxyStyle):
             handleColor.setAlpha(255)
             painter.setBrush(handleColor)
             painter.drawEllipse(handleRect)
+
+
+class SliderToolTipView(FrameView):
+    def __init__(self, parent=None):
+        super().__init__(parent, QHBoxLayout)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint)
+
+        self.valueLabel: QLabel = QLabel(self)
+        self.valueLabel.setAlignment(Qt.AlignCenter)
+
+        self.viewLayout.addWidget(self.valueLabel)
+        qconfig.themeChanged.connect(self.updateTextColor)
+
+    def updateTextColor(self, theme: Theme):
+        self.valueLabel.setStyleSheet("color: #FFFFFF" if theme == Theme.DARK else "color: #000000")
+
+    def setText(self, text: str):
+        self.valueLabel.setText(text)
+        self.adjustSize()
+
+    def text(self) -> str:
+        return self.valueLabel.text()
+
+
+class ToolTipSlider(Slider):
+    """ A slider can be clicked
+
+    Constructors
+    ------------
+    * ToolTipSlider(`parent`: QWidget = None)
+    * ToolTipSlider(`orient`: Qt.Orientation, `parent`: QWidget = None)
+    """
+
+    def _postInit(self):
+        super()._postInit()
+        self.toolTipView: SliderToolTipView = SliderToolTipView()
+
+        self.__timer: QTimer = QTimer(self)
+        self.__timer.timeout.connect(lambda: self.toolTipView.setVisible(False))
+        self.valueChanged.connect(self.__adjustToolTipPos)
+
+    def __adjustToolTipPos(self):
+        if not self.toolTipView.isVisible():
+            self.toolTipView.setVisible(True)
+        self.__timer.stop()
+        pos = self.parent().mapToGlobal(self.pos())
+        if self.orientation() == Qt.Horizontal:
+            x = self.handle.pos().x() - self.toolTipView.width() // 2.8
+            y = -55
+        else:
+            x = -self.toolTipView.width()
+            y = self.handle.pos().y() - self.toolTipView.height() // 2.9
+        pos += QPoint(x, y)
+        self.toolTipView.move(pos)
+        self.toolTipView.setText(str(self.value()))
+        self.__timer.start(300)

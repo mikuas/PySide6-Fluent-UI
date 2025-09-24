@@ -53,10 +53,10 @@ class MultiSelectionListItem(QListWidgetItem):
     def __init__(self, text: str, parent: QWidget = None):
         super().__init__(text, parent)
         self.widget: QWidget = QWidget(parent)
-        self.layout: QHBoxLayout = QHBoxLayout(self.widget)
+        self.viewLayout: QHBoxLayout = QHBoxLayout(self.widget)
         self.checkBox: MultiSelectionItemCheckBox = MultiSelectionItemCheckBox(text, self.widget)
-        self.layout.addWidget(self.checkBox)
-        self.layout.setContentsMargins(10, 0, 0, 0)
+        self.viewLayout.addWidget(self.checkBox)
+        self.viewLayout.setContentsMargins(10, 0, 0, 0)
 
     def setChecked(self, isChecked) -> None:
         self.checkBox.setChecked(isChecked)
@@ -354,10 +354,17 @@ class MultiSelectionComboBox(QWidget):
         painter.setRenderHints(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
         isDark = isDarkTheme()
-        c = 32 if isDark else 255
-        painter.setBrush(QColor(c, c, c))
-        painter.setPen(QColor(c, c, c, 128))
-        painter.drawRoundedRect(self.rect(), 6, 6)
+        if isDark:
+            bc = 0
+            pc = 255
+            alpha = 32
+        else:
+            bc = 255
+            pc = 0
+            alpha = 170
+        painter.setBrush(QColor(bc, bc, bc, alpha))
+        painter.setPen(QColor(pc, pc, pc, 12))
+        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 6, 6)
         if not self.__hasItem:
             c = 255 if isDark else 0
             painter.setPen(QColor(c, c, c, 128))

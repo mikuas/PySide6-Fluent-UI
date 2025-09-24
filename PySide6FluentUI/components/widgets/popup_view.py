@@ -14,7 +14,7 @@ class ContainerFrame(QFrame):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         if isDarkTheme():
-            pc, bc = 255, 34
+            pc, bc = 255, 39
         else:
             pc, bc = 0, 243
         painter.setPen(QColor(pc, pc, pc, 32))

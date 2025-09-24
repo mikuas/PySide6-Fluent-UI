@@ -1,6 +1,6 @@
 # coding:utf-8
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLayout
-from PySide6.QtCore import Qt, QRect
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QColor, QDesktopServices, QFont
 
 from PySide6FluentUI import SubtitleLabel, BodyLabel, FluentIcon, IconWidget, isDarkTheme, setFont, drawRoundRect
@@ -16,12 +16,14 @@ class WidgetCard(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         if isDarkTheme():
             pc = 255
-            fc = "#202020"
+            bc = 0
+            a = 32
         else:
             pc = 0
-            fc = "#f3f3f3"
+            bc = 243
+            a = 170
         painter.setPen(QColor(pc, pc, pc, 16))
-        painter.setBrush(QColor(fc))
+        painter.setBrush(QColor(bc, bc, bc, a))
         drawRoundRect(painter, self.rect(), 10, 10, 0, 0)
 
 
@@ -48,12 +50,14 @@ class CodeLinkCard(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         if isDarkTheme():
             pc = 255
-            fc = "#333333"
+            bc = 52
+            a = 64
         else:
             pc = 0
-            fc = "#fbfbfb"
+            bc = 255
+            a = 170
         painter.setPen(QColor(pc, pc, pc, 16))
-        painter.setBrush(QColor(fc))
+        painter.setBrush(QColor(bc, bc, bc, a))
         painter.setOpacity(0.678 if self.isHover else 1)
         drawRoundRect(painter, self.rect(), 0, 0, 10, 10)
 
@@ -88,8 +92,9 @@ class ItemCard(QWidget):
 
         self.widgetLayout.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         self.widgetLayout.setSpacing(12)
-        self.widgetLayout.setContentsMargins(10, 0, 10, 0)
+        self.widgetLayout.setContentsMargins(15, 0, 15, 0)
 
+        self.codeLinkLayout.setContentsMargins(22, 0, 22, 0)
         self.codeLinkLayout.addWidget(self.title, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.codeLinkLayout.addWidget(self.iconWidget, 1, Qt.AlignRight | Qt.AlignVCenter)
 

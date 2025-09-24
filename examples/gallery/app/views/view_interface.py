@@ -27,6 +27,7 @@ class ViewInterface(Interface):
         self.roundListWidget: RoundListWidget = RoundListWidget(self)
         self.roundListWidget.setFixedHeight(256)
         self.roundListWidget.addItems(["Lost in the Wind", "Shining Stars", "Dream of Tomorrow", "Ocean Whisper", "Lonely Road", "Dancing Shadows", "Moonlight Journey", "Silent Tears", "Endless Summer", "Midnight Echo", "Wings of Freedom", "Crystal Sky", "Burning Heart", "Falling Snow", "Golden Horizon", "Echoes of Time", "Rising Flame", "Secret Garden", "Stormy Night", "Peaceful Dawn"])
+        self.roundListWidget.setCurrentRow(0)
         self.roundListWidget.enableDoubleItemEdit(True)
         self.roundListWidget.setDragDropMode(self.roundListWidget.DragDropMode.InternalMove)
 
@@ -41,6 +42,7 @@ class ViewInterface(Interface):
         self.pageLabel: StrongBodyLabel = StrongBodyLabel("第 1 页", self)
         self.pager: Pager = Pager(1000, 6, self)
 
+        self.pager.setCurrentPage(1)
         self.pager.currentPageChanged.connect(lambda page: self.pageLabel.setText(f"第 {page} 页"))
         self.pagerItem.addWidget(self.pager, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.pagerItem.addWidget(self.pageLabel, 1, Qt.AlignRight | Qt.AlignVCenter)

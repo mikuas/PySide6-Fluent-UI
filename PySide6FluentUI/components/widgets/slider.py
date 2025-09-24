@@ -4,9 +4,8 @@ from PySide6.QtGui import QColor, QMouseEvent, QPainter, QPainterPath, QFontMetr
 from PySide6.QtWidgets import QProxyStyle, QSlider, QStyle, QStyleOptionSlider, QWidget, QLabel, QHBoxLayout
 
 from .popup_view import FrameView
-from ...common.style_sheet import isDarkTheme, Theme
+from ...common.style_sheet import isDarkTheme, qconfig
 from ...common.color import autoFallbackThemeColor
-from ...common.config import qconfig
 from ...common.overload import singledispatchmethod
 
 
@@ -324,12 +323,12 @@ class SliderToolTipView(FrameView):
 
         self.valueLabel: QLabel = QLabel(self)
         self.valueLabel.setAlignment(Qt.AlignCenter)
-
         self.viewLayout.addWidget(self.valueLabel)
-        qconfig.themeChanged.connect(self.updateTextColor)
 
-    def updateTextColor(self, theme: Theme):
-        self.valueLabel.setStyleSheet("color: #FFFFFF" if theme == Theme.DARK else "color: #000000")
+        qconfig.themeChangedFinished.connect(self.updateTextColor)
+    
+    def updateTextColor(self):
+        self.valueLabel.setStyleSheet("color: #FFFFFF" if isDarkTheme() else "color: #000000")
 
     def setText(self, text: str):
         self.valueLabel.setText(text)

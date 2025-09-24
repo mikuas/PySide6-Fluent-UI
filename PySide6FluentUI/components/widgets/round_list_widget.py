@@ -54,10 +54,24 @@ class RoundListWidgetItemDelegate(QStyledItemDelegate):
         pen.setWidthF(1.4)
         if option.state & (QStyle.StateFlag.State_Selected | QStyle.StateFlag.State_MouseOver):
             pen.setColor(self._borderColor or themeColor())
-            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2a2a2a") if isDark else QColor("#ebedf1"))
+            if isDark:
+                fc = 32
+                alpha = 32
+            else:
+                fc = 243
+                alpha = 170
+            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor(fc, fc, fc, alpha))
         else:
-            pen.setColor(QColor("#3A3A3A") if isDark else QColor("#D7D6D6"))
-            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor("#2b2b2b") if isDark else QColor("#fafbfc"))
+            if isDark:
+                pc = 58
+                fc = 0
+                alpha = 32
+            else:
+                pc = 214
+                fc = 255
+                alpha = 170
+            pen.setColor(QColor(pc, pc, pc, 114))
+            painter.fillRect(rect.adjusted(1, 1, -1, -1), QColor(fc, fc, fc, alpha))
         painter.setPen(pen)
         painter.drawRoundedRect(rect, 8, 8)
 

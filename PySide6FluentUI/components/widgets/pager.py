@@ -19,6 +19,7 @@ class PageButton(QWidget):
         self.page: int = page
         self._text = str(page)
         self._isSelected: bool = selected
+        self._isHover: bool = False
         self.setFixedSize(32, 32)
 
     def setSelected(self, isSelected: bool) -> None:
@@ -29,6 +30,14 @@ class PageButton(QWidget):
 
     def isSelected(self) -> bool:
         return self._isSelected
+
+    def enterEvent(self, event):
+        self._isHover = True
+        self.update()
+
+    def leaveEvent(self, event):
+        self._isHover = False
+        self.update()
 
     def mouseReleaseEvent(self, event):
         if event.button() is Qt.LeftButton:
@@ -46,8 +55,8 @@ class PageButton(QWidget):
         c = 0 if isDark else 255
         if self._isSelected:
             painter.setBrush(themeColor())
-        else:
-            painter.setBrush(QColor(32, 32, 32) if isDark else QColor(255, 255, 255))
+        elif self._isHover:
+            painter.setBrush(QColor(46, 46, 46) if isDark else QColor(224, 224, 224))
         painter.drawRoundedRect(rect, 6, 6)
         
         painter.setPen(QColor(c, c, c) if self._isSelected else (QColor(255, 255, 255) if isDark else QColor(0, 0, 0)))

@@ -1,5 +1,6 @@
 # coding:utf-8
-import sys
+import sys, os
+
 from PySide6.QtWidgets import QApplication
 
 import resources.app_resources

@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QVBoxLayout
 
 from PySide6FluentUI import FluentIcon, RoundPushButton, RoundToolButton, FillPushButton, FillToolButton, ComboBox, \
     OutlinePushButton, OutlineToolButton, LabelLineEdit, PinBox, MultiSelectionComboBox, PopupDrawerPosition, PopupDrawerWidget, \
-    SubtitleRadioButton
+    SubtitleRadioButton, ToolTipSlider
 
 from ..widgets.basic_interface import Interface
 from ..widgets.widget_item import StandardItem
@@ -24,6 +24,7 @@ class BasicInputInterface(Interface):
         self.__initLineEdit()
         self.__initComboBox()
         self.__initSubTitleRadio()
+        self.__initToolTipSlider()
 
     def __initButtonItem(self):
         """ round push button """
@@ -106,10 +107,22 @@ class BasicInputInterface(Interface):
         widgetLayout.addWidget(self.subTitleRadio3)
         widgetLayout.addWidget(self.subTitleRadio4)
 
+        # from PySide6FluentUI import RadioButton
+        # widgetLayout.addWidget(RadioButton("Hello", self))
+
         self.subTitleRadioItem.card.setFixedHeight(264)
         self.subTitleRadioItem.addLayout(widgetLayout, 1)
         self.scrollLayout.addWidget(self.subTitleRadioItem)
-    
+
+    def __initToolTipSlider(self):
+        self.toolTipSliderItem: StandardItem = StandardItem("带工具提示的滑动条", self)
+        self.toolTipSlider: ToolTipSlider = ToolTipSlider(Qt.Orientation.Horizontal, self)
+        self.toolTipSlider.setRange(0, 100)
+        self.toolTipSlider.setFixedWidth(256)
+
+        self.toolTipSliderItem.addWidget(self.toolTipSlider)
+        self.scrollLayout.addWidget(self.toolTipSliderItem)
+
     def initRoundSettingDrawer(self):
         self.roundSettingDrawer: PopupDrawerWidget = PopupDrawerWidget("Round Button Settings", position=PopupDrawerPosition.RIGHT, parent=self)
         

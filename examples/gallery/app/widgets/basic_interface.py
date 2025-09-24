@@ -101,7 +101,7 @@ class Interface(QWidget):
         self.scrollLayout.setAlignment(Qt.AlignTop)
     
     def initPaymentMessageBox(self):
-        self.paymentMessageBox: PaymentMessageBox = PaymentMessageBox("支持作者", self)
+        self.paymentMessageBox: PaymentMessageBox = PaymentMessageBox("支持作者", self.window())
         self.likeButton.clicked.connect(self.paymentMessageBox.show)
 
     @staticmethod

@@ -4,8 +4,7 @@ from PySide6.QtCore import Qt, QRectF, QStringListModel
 import sys
 
 from PySide6FluentUI import *
-
-from app.common.config import update
+from examples.gallery.app.common.config import update
 
 
 class Window(SplitWidget):
@@ -30,10 +29,10 @@ class Window(SplitWidget):
 
         self.roundListWidget.addItems([f"Item {_}" for _ in range(1, 11)])
 
-        self.box.addWidget(self.colorPicker)
-        self.box.addWidget(self.dropDownColorPalette)
-        # self.box.addWidget(self.roundListView)
-        # self.box.addWidget(self.roundListWidget)
+        self.box.addWidget(self.colorPicker, 0, Qt.AlignHCenter)
+        self.box.addWidget(self.dropDownColorPalette, 0, Qt.AlignHCenter)
+        self.box.addWidget(self.roundListView)
+        self.box.addWidget(self.roundListWidget)
         self.box.setAlignment(Qt.AlignCenter)
 
         self.colorPicker.colorChanged.connect(print)

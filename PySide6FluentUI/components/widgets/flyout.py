@@ -1,11 +1,13 @@
 # coding:utf-8
 from enum import Enum
 import sys
-from typing import Union
+from typing import Union, Tuple
 
-from PySide6.QtCore import (Qt, QPropertyAnimation, QPoint, QParallelAnimationGroup, QEasingCurve, QMargins,
-                          QRectF, QObject, QSize, Signal, QEvent)
-from PySide6.QtGui import QPixmap, QPainter, QColor, QCursor, QIcon, QImage, QPainterPath, QBrush, QMovie, QImageReader
+from PySide6.QtCore import (
+    Qt, QPropertyAnimation, QPoint, QParallelAnimationGroup, QEasingCurve, QMargins, QRectF, QObject,
+    QSize, Signal, QEvent
+)
+from PySide6.QtGui import QPixmap, QPainter, QColor, QCursor, QIcon, QImage
 from PySide6.QtWidgets import QWidget, QGraphicsDropShadowEffect, QLabel, QHBoxLayout, QVBoxLayout, QApplication
 
 from ...common.auto_wrap import TextWrap
@@ -14,6 +16,7 @@ from ...common.icon import FluentIconBase, drawIcon, FluentIcon
 from ...common.screen import getCurrentScreenGeometry
 from .button import TransparentToolButton
 from .label import ImageLabel
+from .popup_view import PopupView
 
 
 class FlyoutAnimationType(Enum):
@@ -519,3 +522,96 @@ class DummyFlyoutAnimationManager(FlyoutAnimationManager):
         """ return the top left position relative to the target """
         m = self.flyout.hBoxLayout.contentsMargins()
         return target.mapToGlobal(QPoint(-m.left(), -self.flyout.sizeHint().height()+m.bottom()-8))
+
+
+class FlyoutPosition(Enum):
+
+    TOP = 1
+    LEFT = 2
+    RIGHT = 3
+    BOTTOM = 4
+
+
+class FlyoutDialog(PopupView):
+    def __init__(self, target: QWidget, position: FlyoutPosition = FlyoutPosition.TOP, parent=None, layout=QVBoxLayout):
+        super().__init__(parent, layout)
+        self.posAni.setEasingCurve(QEasingCurve.OutQuart)
+        self.positionManager: FlyoutDialogManager = FlyoutDialogManager.get(position, self, target)
+
+    def show(self):
+        self.adjustSize()
+        if self.isVisible():
+            self.hide()
+        self.exec(*self.positionManager.pos())
+
+
+class FlyoutDialogManager:
+    registry = {}
+
+    def __init__(self, view: FlyoutDialog, target: QWidget):
+        super().__init__()
+        self.view: FlyoutDialog = view
+        self.target: QWidget = target
+
+    @classmethod
+    def register(cls, element):
+        def decorator(classType):
+            cls.registry[element] = classType
+            return classType
+
+        return decorator
+
+    @classmethod
+    def get(cls, operation, view, target):
+        if operation not in cls.registry:
+            raise ValueError(f"No operation registered for {operation}")
+        return cls.registry[operation](view, target)
+
+    def pos(self) -> Tuple[QPoint, QPoint]:
+        raise NotImplementedError
+
+
+@FlyoutDialogManager.register(FlyoutPosition.TOP)
+class TopFlyoutDialogManager(FlyoutDialogManager):
+
+    def pos(self) -> Tuple[QPoint, QPoint]:
+        pos = self.target.mapToGlobal(self.target.rect().topLeft())
+        x, y = pos.x(), pos.y()
+        x -= (self.view.width() - self.target.width()) // 2
+        y -= self.view.height()
+
+        return QPoint(x, y + 12), QPoint(x, y)
+
+
+@FlyoutDialogManager.register(FlyoutPosition.BOTTOM)
+class BottomFlyoutDialogManager(FlyoutDialogManager):
+
+    def pos(self) -> Tuple[QPoint, QPoint]:
+        pos = self.target.mapToGlobal(self.target.rect().bottomLeft())
+        x, y = pos.x(), pos.y()
+        x -= (self.view.width() - self.target.width()) // 2
+
+        return QPoint(x, y - 12), QPoint(x, y)
+
+
+@FlyoutDialogManager.register(FlyoutPosition.LEFT)
+class LeftFlyoutDialogManager(FlyoutDialogManager):
+
+    def pos(self) -> Tuple[QPoint, QPoint]:
+        pos = self.target.mapToGlobal(self.target.rect().topLeft())
+        x, y = pos.x(), pos.y()
+        x -= self.view.width()
+        y -= (self.view.height() - self.target.height()) // 2
+
+        return QPoint(x + 12, y), QPoint(x, y)
+
+
+@FlyoutDialogManager.register(FlyoutPosition.RIGHT)
+class RightFlyoutDialogManager(FlyoutDialogManager):
+
+    def pos(self) -> Tuple[QPoint, QPoint]:
+        pos = self.target.mapToGlobal(self.target.rect().topRight())
+        x, y = pos.x(), pos.y()
+        y -= (self.view.height() - self.target.height()) // 2
+
+        return QPoint(x - 12, y), QPoint(x, y)

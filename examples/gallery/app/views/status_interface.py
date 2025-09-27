@@ -159,3 +159,4 @@ class StatusInterface(Interface):
         )
 
         self.editTextButton.clicked.connect(self.textDialog.exec)
+        self.textDialog.colorPickButton.colorChanged.connect(self.customToastButton.setFillColor)

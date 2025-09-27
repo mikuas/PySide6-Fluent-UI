@@ -140,6 +140,9 @@ class FluentLabelBase(QLabel):
         menu = LabelContextMenu(parent=self)
         menu.exec(self.mapToGlobal(pos))
 
+    def setFontSize(self, size: int):
+        self.setFont(getFont(size))
+
 
 class CaptionLabel(FluentLabelBase):
     """ Caption text label
@@ -453,7 +456,7 @@ class AvatarWidget(ImageLabel):
 
     def setBackgroundColor(self, light: QColor, dark: QColor):
         self.lightBackgroundColor = QColor(light)
-        self.darkBackgroundColor = QColor(light)
+        self.darkBackgroundColor = QColor(dark)
         self.update()
 
     def paintEvent(self, e):

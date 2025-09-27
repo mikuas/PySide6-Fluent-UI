@@ -16,6 +16,17 @@ class QtProperty(QObject):
 
         self.valueChanged.connect(lambda: print(f"{self.value = }"))
 
+    # @Property(int)
+    # def value(self) -> int:
+    #     return self._value
+    #
+    # @value.setter
+    # def value(self, value: int):
+    #     if value < 0 or value == self._value:
+    #         return
+    #     self._value = value
+    #     self.valueChanged.emit(value)
+
     def getValue(self) -> int:
         return self._value
 
@@ -63,7 +74,7 @@ def qtProperDemo():
     animation = QPropertyAnimation(qtProperty, b"value")
     animation.setStartValue(0)
     animation.setEndValue(1000)
-    animation.setDuration(1000)
+    animation.setDuration(5000)
 
     window = Window()
     window._property = qtProperty

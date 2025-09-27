@@ -43,7 +43,10 @@ from .table_view import TableView, TableWidget, TableItemDelegate
 from .tool_tip import ToolTip, ToolTipFilter, ToolTipPosition, setToolTipInfos, setToolTipInfo
 from .cycle_list_widget import CycleListWidget
 from .scroll_bar import ScrollBar, SmoothScrollBar, SmoothScrollDelegate
-from .flyout import FlyoutView, FlyoutViewBase, Flyout, FlyoutAnimationType, FlyoutAnimationManager
+from .flyout import (
+    FlyoutView, FlyoutViewBase, Flyout, FlyoutAnimationType, FlyoutAnimationManager,
+    FlyoutPosition, FlyoutDialog, FlyoutDialogManager
+)
 from .tab_view import TabBar, TabItem, TabCloseButtonDisplayMode
 from .page_widget import PagerWidgetBase, HorizontalPagerWidget, VerticalPagerWidget
 from .pips_pager import (

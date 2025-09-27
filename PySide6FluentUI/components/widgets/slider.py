@@ -1,7 +1,7 @@
 # coding:utf-8
 from PySide6.QtCore import QSize, Qt, Signal, QPoint, QRectF, QPropertyAnimation, Property, QTimer
-from PySide6.QtGui import QColor, QMouseEvent, QPainter, QPainterPath, QFontMetrics
-from PySide6.QtWidgets import QProxyStyle, QSlider, QStyle, QStyleOptionSlider, QWidget, QLabel, QHBoxLayout
+from PySide6.QtGui import QColor, QMouseEvent, QPainter, QPainterPath
+from PySide6.QtWidgets import QProxyStyle, QSlider, QStyle, QStyleOptionSlider, QWidget, QLabel, QHBoxLayout, QGraphicsOpacityEffect
 
 from .popup_view import FrameView
 from ...common.style_sheet import isDarkTheme, qconfig
@@ -14,6 +14,8 @@ class SliderHandle(QWidget):
 
     pressed = Signal()
     released = Signal()
+    hover = Signal()
+    level = Signal()
 
     def __init__(self, parent: QSlider):
         super().__init__(parent=parent)
@@ -40,9 +42,12 @@ class SliderHandle(QWidget):
 
     def enterEvent(self, e):
         self._startAni(6)
+        self.hover.emit()
 
     def leaveEvent(self, e):
         self._startAni(5)
+        self.level.emit()
+        # print('level')
 
     def mousePressEvent(self, e):
         self._startAni(4)
@@ -326,7 +331,7 @@ class SliderToolTipView(FrameView):
         self.viewLayout.addWidget(self.valueLabel)
 
         qconfig.themeChangedFinished.connect(self.updateTextColor)
-    
+
     def updateTextColor(self):
         self.valueLabel.setStyleSheet("color: #FFFFFF" if isDarkTheme() else "color: #000000")
 
@@ -350,15 +355,20 @@ class ToolTipSlider(Slider):
     def _postInit(self):
         super()._postInit()
         self.toolTipView: SliderToolTipView = SliderToolTipView()
-
         self.__timer: QTimer = QTimer(self)
-        self.__timer.timeout.connect(lambda: self.toolTipView.setVisible(False))
-        self.valueChanged.connect(self.__adjustToolTipPos)
 
-    def __adjustToolTipPos(self):
-        if not self.toolTipView.isVisible():
-            self.toolTipView.setVisible(True)
-        self.__timer.stop()
+        self.connectSignalSlot()
+
+    def connectSignalSlot(self):
+        self.__timer.timeout.connect(self._hideToolTipView)
+        self.valueChanged.connect(self.__adjustToolTipPos)
+        self.handle.hover.connect(self.__onHoverHandle)
+        self.handle.level.connect(self._hideToolTipView)
+
+    def _hideToolTipView(self):
+        self.toolTipView.setVisible(False)
+
+    def _endPos(self) -> QPoint:
         pos = self.parent().mapToGlobal(self.pos())
         if self.orientation() == Qt.Horizontal:
             x = self.handle.pos().x() - self.toolTipView.width() // 2.8
@@ -367,6 +377,16 @@ class ToolTipSlider(Slider):
             x = -self.toolTipView.width()
             y = self.handle.pos().y() - self.toolTipView.height() // 2.9
         pos += QPoint(x, y)
-        self.toolTipView.move(pos)
+        return pos
+
+    def __onHoverHandle(self):
+        self.__timer.stop()
+        QTimer.singleShot(400, lambda: {self.toolTipView.setVisible(True), self.toolTipView.move(self._endPos())})
+
+    def __adjustToolTipPos(self):
+        if not self.toolTipView.isVisible():
+            self.toolTipView.setVisible(True)
+        self.__timer.stop()
+        self.toolTipView.move(self._endPos())
         self.toolTipView.setText(str(self.value()))
         self.__timer.start(300)

@@ -45,30 +45,37 @@ class FrameView(QFrame):
 
 
 class PopupView(FrameView):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, parent=None, layout=QVBoxLayout):
+        super().__init__(parent, layout)
         self.viewLayout.setSpacing(0)
         self.viewLayout.setContentsMargins(1, 1, 1, 1)
 
         self.aniGroup: QParallelAnimationGroup = QParallelAnimationGroup(self)
 
         self.opacityAni: QPropertyAnimation = QPropertyAnimation(self, b'windowOpacity', self)
-        self.opacityAni.setDuration(250)
+        self.opacityAni.setDuration(400)
         self.opacityAni.setEasingCurve(QEasingCurve.OutQuad)
 
         self.posAni: QPropertyAnimation = QPropertyAnimation(self, b'pos')
         self.posAni.setDuration(250)
-        self.posAni.setEasingCurve(QEasingCurve.Type.OutBack)
+        self.posAni.setEasingCurve(QEasingCurve.OutQuad)
 
         self.aniGroup.addAnimation(self.opacityAni)
         self.aniGroup.addAnimation(self.posAni)
 
-    def _run(self):
+    def showEvent(self, event):
         self.opacityAni.setStartValue(0)
         self.opacityAni.setEndValue(1)
         self.posAni.setStartValue(self._slideStartPos())
         self.posAni.setEndValue(self._slideEndPos())
         self.aniGroup.start()
+        super().showEvent(event)
+
+    def hideEvent(self, event):
+        self.opacityAni.setStartValue(1)
+        self.opacityAni.setEndValue(0)
+        self.opacityAni.start()
+        super().hideEvent(event)
 
     def _slideStartPos(self) -> QPoint:
         return self.__startPos
@@ -84,4 +91,3 @@ class PopupView(FrameView):
         self._setPos(startPos, endPos)
         self.raise_()
         super().show()
-        self._run()

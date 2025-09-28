@@ -66,9 +66,9 @@ class PopupDrawerWidget(QFrame):
 
     def __initShadowEffect(self):
         self._shadow = QGraphicsDropShadowEffect(self)
-        self._shadow.setBlurRadius(18)
+        self._shadow.setBlurRadius(16)
         self._shadow.setOffset(0, 0)
-        self._shadow.setColor(QColor(0, 0, 0, 128))
+        self._shadow.setColor(QColor(0, 0, 0, 64))
         self.setGraphicsEffect(self._shadow)
 
     def _adjustDrawer(self):

@@ -5,14 +5,17 @@ from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout
 
 from PySide6FluentUI import FillPushButton, ToastInfoBar, ToastInfoBarColor, ToastInfoBarPosition, themeColor, \
     MessageBoxBase, TransparentToolButton, FluentIcon, setToolTipInfo, ToolTipPosition, CaptionLabel, LineEdit, \
-    ComboBox, ColorPickerButton
+    ComboBox, ColorPickerButton, FlyoutDialog, FlyoutPosition
 from ..widgets.basic_interface import Interface
 from ..widgets.widget_item import StandardItem
 
 
 class TextDialog(MessageBoxBase):
+# class TextDialog(FlyoutDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+    # def __init__(self, target, position, parent):
+    #     super().__init__(target, position, parent, layout=QHBoxLayout)
         self.vBoxLayout.removeItem(self.viewLayout)
         self.viewLayout = QHBoxLayout()
         self.vBoxLayout.insertLayout(0, self.viewLayout, 1)
@@ -69,7 +72,6 @@ class StatusInterface(Interface):
         self.setObjectName("StatusInterface")
         self.vBoxLayout.addWidget(self.scrollArea)
 
-        self.textDialog: TextDialog = TextDialog(self.window())
         self.toastInfoBarItem: StandardItem = StandardItem("吐司提示", self)
         self.successToastButton: FillPushButton = FillPushButton("成功", self)
         self.errorToastButton: FillPushButton = FillPushButton("失败", self)
@@ -77,6 +79,7 @@ class StatusInterface(Interface):
         self.infoToastButton: FillPushButton = FillPushButton("信息", self)
         self.customToastButton: FillPushButton = FillPushButton("自定义", self)
         self.editTextButton: TransparentToolButton = TransparentToolButton(FluentIcon.EDIT, self)
+        self.textDialog: TextDialog = TextDialog(self.parent())
 
         self.textDialog.titleEdit.setText("Lesson")
         self.textDialog.connectEdit.setText("最短的捷径就是绕远路,绕远路才是我最短的捷径")
@@ -159,4 +162,5 @@ class StatusInterface(Interface):
         )
 
         self.editTextButton.clicked.connect(self.textDialog.exec)
+        # self.editTextButton.clicked.connect(self.textDialog.show)
         self.textDialog.colorPickButton.colorChanged.connect(self.customToastButton.setFillColor)

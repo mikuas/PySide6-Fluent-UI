@@ -21,11 +21,11 @@ class ViewInterface(Interface):
 
     def __initRoundListWidget(self):
         self.roundListItem: StandardItem = StandardItem("圆角列表组件", self)
-        self.roundListItem.card.setFixedHeight(328)
+        self.roundListItem.card.setFixedHeight(400)
         self.roundListItem.card.widgetLayout.setContentsMargins(10, 10, 10, 10)
 
         self.roundListWidget: RoundListWidget = RoundListWidget(self)
-        self.roundListWidget.setFixedHeight(256)
+        self.roundListWidget.setFixedHeight(316)
         self.roundListWidget.addItems(["Lost in the Wind", "Shining Stars", "Dream of Tomorrow", "Ocean Whisper", "Lonely Road", "Dancing Shadows", "Moonlight Journey", "Silent Tears", "Endless Summer", "Midnight Echo", "Wings of Freedom", "Crystal Sky", "Burning Heart", "Falling Snow", "Golden Horizon", "Echoes of Time", "Rising Flame", "Secret Garden", "Stormy Night", "Peaceful Dawn"])
         self.roundListWidget.setCurrentRow(0)
         self.roundListWidget.enableDoubleItemEdit(True)

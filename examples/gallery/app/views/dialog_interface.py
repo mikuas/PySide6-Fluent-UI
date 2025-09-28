@@ -1,5 +1,8 @@
 # coding:utf-8
-from PySide6FluentUI import PopupDrawerWidget, PopupDrawerPosition, PushButton, DropDownColorPalette, ScreenColorPicker
+from PySide6.QtWidgets import QSizePolicy
+
+from PySide6FluentUI import PopupDrawerWidget, PopupDrawerPosition, PushButton, DropDownColorPalette, ScreenColorPicker, \
+    FlyoutDialog, StrongBodyLabel, BodyLabel, TransparentToolButton, FluentIcon, HorizontalSeparator, HBoxLayout
 
 from ..widgets.basic_interface import Interface
 from ..widgets.widget_item import StandardItem
@@ -14,6 +17,7 @@ class DialogInterface(Interface):
         self.__initPopupDrawer()
         self.__initDropDownColorPalette()
         self.__initScreenColorPicker()
+        self.__initFlyoutDialog()
         self.scrollLayout.addStretch(1)
         self.connectSignalSlot()
 
@@ -55,8 +59,42 @@ class DialogInterface(Interface):
         self.screenColorItem.addWidget(self.screenColorPicker)
         self.scrollLayout.addWidget(self.screenColorItem)
 
+    def __initFlyoutDialog(self):
+        self.flyoutDialogItem: StandardItem = StandardItem("弹出对话框", self)
+        self.targetButton: PushButton = PushButton("显示对话框", self)
+        self.flyoutDialog: FlyoutDialog = FlyoutDialog(self.targetButton, parent=self)
+
+        self.titleLabel: StrongBodyLabel = StrongBodyLabel("   无名", self)
+        self.contentLabel: BodyLabel = BodyLabel("     左眼用来忘记你，右眼用来记住你。    ", self)
+        self.yesBtn: TransparentToolButton = TransparentToolButton(FluentIcon.ACCEPT, self)
+        self.closeBtn: TransparentToolButton = TransparentToolButton(FluentIcon.CLOSE, self)
+
+        self.titleLabel.setFontSize(22)
+        self.yesBtn.setFixedHeight(35)
+        self.closeBtn.setFixedHeight(35)
+        self.yesBtn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.closeBtn.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+        self.flyoutDialog.viewLayout.setContentsMargins(1, 10, 1, 0)
+        self.flyoutDialog.viewLayout.addWidget(self.titleLabel)
+        self.flyoutDialog.viewLayout.addSpacing(5)
+        self.flyoutDialog.viewLayout.addWidget(self.contentLabel)
+        self.flyoutDialog.viewLayout.addSpacing(10)
+        self.flyoutDialog.viewLayout.addWidget(HorizontalSeparator(self))
+
+        hBoxlayout = HBoxLayout()
+        self.flyoutDialog.viewLayout.addLayout(hBoxlayout, 1)
+        hBoxlayout.addWidget(self.yesBtn)
+        hBoxlayout.addWidget(self.closeBtn)
+
+        self.flyoutDialogItem.addWidget(self.targetButton)
+        self.scrollLayout.addWidget(self.flyoutDialogItem)
+
     def connectSignalSlot(self):
         self.popLeftDrawerButton.clicked.connect(self.leftPopupDrawer.toggleDrawer)
         self.popTopDrawerButton.clicked.connect(self.topPopupDrawer.toggleDrawer)
         self.popRightDrawerButton.clicked.connect(self.rightPopupDrawer.toggleDrawer)
         self.popBottomDrawerButton.clicked.connect(self.bottomPopupDrawer.toggleDrawer)
+        self.targetButton.clicked.connect(self.flyoutDialog.show)
+        self.yesBtn.clicked.connect(self.flyoutDialog.hide)
+        self.closeBtn.clicked.connect(self.flyoutDialog.hide)

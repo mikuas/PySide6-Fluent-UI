@@ -98,7 +98,7 @@ class ToastInfoBar(QFrame):
         self.__initLayout()
     
     def __initLayout(self):
-        self.hBoxLayout.setContentsMargins(6, 6, 6, 6)
+        self.hBoxLayout.setContentsMargins(8, 8, 8, 8)
         self.hBoxLayout.setSizeConstraint(QVBoxLayout.SetMinimumSize)
         self.textLayout.setSizeConstraint(QHBoxLayout.SetMinimumSize)
         self.textLayout.setAlignment(Qt.AlignTop)
@@ -253,8 +253,8 @@ class ToastInfoBar(QFrame):
         self._adjustText()
         super().showEvent(event)
         self.manager.add(self)
-        self.startPosition = self.manager._slideStartPos(self)
-        self.endPosition = self.manager._slideEndPos(self)
+        self.startPosition = self.manager.slideStartPos(self)
+        self.endPosition = self.manager.slideEndPos(self)
         self.run()
 
         if self.duration >= 0:
@@ -271,7 +271,7 @@ class ToastInfoBar(QFrame):
         if obj is self.parent() and event.type() in [QEvent.Resize, QEvent.WindowStateChange]:
             try:
                 self._adjustText()
-                self.move(self.manager._slideEndPos(self))
+                self.move(self.manager.slideEndPos(self))
             except Exception: ...
         return super().eventFilter(obj, event)
 
@@ -281,11 +281,11 @@ class ToastInfoBar(QFrame):
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
         painter.setBrush(self.toastColor)
-        painter.drawRoundedRect(0, 0, self.width() - 0.1, self.height() - 4, 8, 8)
+        w, h = self.width(), self.height()
+        painter.drawRoundedRect(0, 0, w, h - 4, 8, 8)
 
-        c = self.backgroundColor or (QColor("#323232") if isDarkTheme() else QColor("#FFFFFF"))
-        painter.setBrush(c)
-        painter.drawRoundedRect(0, 5, self.width(), self.height() - 5, 6, 6)
+        painter.setBrush(self.backgroundColor or (QColor("#323232") if isDarkTheme() else QColor("#FFFFFF")))
+        painter.drawRoundedRect(0, 5, w, h - 5, 6, 6)
 
 
 class ToastInfoBarManager(QObject):
@@ -327,7 +327,7 @@ class ToastInfoBarManager(QObject):
         # print(f"Length: {len(self.toastInfoBars)}")
         for bar in self.toastInfoBars:
             # print(f"For ObjectName: {bar.objectName()}")
-            bar.startPosition, bar.endPosition = bar.pos(), self._slideEndPos(bar)
+            bar.startPosition, bar.endPosition = bar.pos(), self.slideEndPos(bar)
             bar.run()
         # print("\n")
 
@@ -345,93 +345,93 @@ class ToastInfoBarManager(QObject):
             raise ValueError(f"No operation registered for {operation}")
         return cls.registry[operation]()
 
-    def _slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+    def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
         raise NotImplementedError
     
-    def _slideEndPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+    def slideEndPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
         raise NotImplementedError
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.TOP)
 class TopToastInfoBarManager(ToastInfoBarManager):
 
-    def _slideEndPos(self, toastInfoBar):
-        x = (toastInfoBar.parent().width() - toastInfoBar.width()) / 2
+    def slideEndPos(self, toastInfoBar):
+        x = (toastInfoBar.parent().width() - toastInfoBar.width()) // 2
         y = self.margin / 2.5
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y += bar.height() + self.margin
         return QPoint(x, y + self.margin)
 
-    def _slideStartPos(self, toastInfoBar) -> QPoint:
-        pos = self._slideEndPos(toastInfoBar)
-        return QPoint(pos.x(), pos.y() - toastInfoBar.height())
+    def slideStartPos(self, toastInfoBar) -> QPoint:
+        pos = self.slideEndPos(toastInfoBar)
+        return QPoint(pos.x(), pos.y() - toastInfoBar.height() // 3)
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.TOP_LEFT)
 class TopLeftToastInfoBarManager(ToastInfoBarManager):
 
-    def _slideEndPos(self, toastInfoBar):
+    def slideEndPos(self, toastInfoBar):
         x = self.margin
         y = self.margin / 2.5
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y += bar.height() + self.margin
         return QPoint(x, y + self.margin)
 
-    def _slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
-        pos = self._slideEndPos(toastInfoBar)
+    def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+        pos = self.slideEndPos(toastInfoBar)
         return QPoint(-toastInfoBar.width(), pos.y())
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.TOP_RIGHT)
 class TopRightToastInfoBarManager(ToastInfoBarManager):
 
-    def _slideEndPos(self, toastInfoBar):
+    def slideEndPos(self, toastInfoBar):
         x = toastInfoBar.parent().width() - toastInfoBar.width() - self.margin
         y = self.margin / 2.5
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y += bar.height() + self.margin
         return QPoint(x, y + self.margin)
 
-    def _slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
-        pos = self._slideEndPos(toastInfoBar)
+    def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+        pos = self.slideEndPos(toastInfoBar)
         return QPoint(toastInfoBar.parent().width() + toastInfoBar.width(), pos.y())
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.BOTTOM)
 class BottomToastInfoBarManager(ToastInfoBarManager):
 
-    def _slideEndPos(self, toastInfoBar):
+    def slideEndPos(self, toastInfoBar):
         parent = toastInfoBar.parent()
-        x = (parent.width() - toastInfoBar.width()) / 2
+        x = (parent.width() - toastInfoBar.width()) // 2
         y = parent.height() - self.margin
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y -= bar.height() + self.margin
         return QPoint(x, y - toastInfoBar.height())
 
-    def _slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
-        pos = self._slideEndPos(toastInfoBar)
-        return QPoint(pos.x(), pos.y() + toastInfoBar.height())
+    def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+        pos = self.slideEndPos(toastInfoBar)
+        return QPoint(pos.x(), pos.y() + toastInfoBar.height() // 3)
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.BOTTOM_LEFT)
 class BottomLeftToastInfoBarManager(ToastInfoBarManager):
 
-    def _slideEndPos(self, toastInfoBar):
+    def slideEndPos(self, toastInfoBar):
         x = self.margin
         y = toastInfoBar.parent().height() - self.margin
         for bar in self.toastInfoBars[:self.toastInfoBars.index(toastInfoBar)]:
             y -= bar.height() + self.margin
         return QPoint(x, y - toastInfoBar.height())
 
-    def _slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
-        pos = self._slideEndPos(toastInfoBar)
+    def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+        pos = self.slideEndPos(toastInfoBar)
         return QPoint(-toastInfoBar.width(), pos.y())
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.BOTTOM_RIGHT)
 class BottomRightToastInfoBarManager(ToastInfoBarManager):
 
-    def _slideEndPos(self, toastInfoBar):
+    def slideEndPos(self, toastInfoBar):
         parent = toastInfoBar.parent()
         x = parent.width() - toastInfoBar.width() - self.margin
         y = parent.height() - self.margin
@@ -439,6 +439,6 @@ class BottomRightToastInfoBarManager(ToastInfoBarManager):
             y -= bar.height() + self.margin
         return QPoint(x, y - toastInfoBar.height())
 
-    def _slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
-        pos = self._slideEndPos(toastInfoBar)
+    def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
+        pos = self.slideEndPos(toastInfoBar)
         return QPoint(toastInfoBar.parent().width() + self.margin, pos.y())

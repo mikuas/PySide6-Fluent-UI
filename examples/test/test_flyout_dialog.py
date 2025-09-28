@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QPoint, QEasingCurve
 
 from PySide6FluentUI import SplitWidget, PopupView, BodyLabel, HorizontalSeparator, TransparentToolButton, \
     FluentIcon, StrongBodyLabel, PushButton
+from examples.wiindow.splitWidget.demo import Interface
 
 
 class FlyoutPosition(Enum):
@@ -102,7 +103,7 @@ class RightFlyoutDialogManager(FlyoutDialogManager):
         return QPoint(x - 12, y), QPoint(x, y)
 
 
-class Window(SplitWidget):
+class Window(Interface):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setLayout(QHBoxLayout())
@@ -147,6 +148,7 @@ class Window(SplitWidget):
         self.hBoxLayout.addWidget(self.closeBtn, 1)
 
     def connectSignalSlot(self):
+        super().connectSignalSlot()
         self.button1.clicked.connect(lambda: {
             self.updateTarget(self.button1),
             self.flyoutDialog.show()

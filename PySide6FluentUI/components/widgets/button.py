@@ -1158,7 +1158,7 @@ class RoundButtonBase: # New
 
     def _drawBorder(self, painter: QPainter, rect: QRect) -> int:
         if isDarkTheme():
-            pc, bc, alpha = 255, 0, 32
+            pc, bc, alpha = 255, 48, 32
         else:
             pc, bc, alpha = 0, 243, 170
         pen = QPen(self.borderColor() or QColor(pc, pc, pc, 32))

@@ -249,9 +249,20 @@ class ToastInfoBar(QFrame):
         self.widgetLayout.addWidget(widget, stretch, alignment)
         self.adjustSize()
 
-    def showEvent(self, event):
+    # def showEvent(self, event):
+    #     self._adjustText()
+    #     super().showEvent(event)
+    #     self.manager.add(self)
+    #     self.startPosition = self.manager.slideStartPos(self)
+    #     self.endPosition = self.manager.slideEndPos(self)
+    #     self.run()
+    #
+    #     if self.duration >= 0:
+    #         QTimer.singleShot(self.duration, self.close)
+
+    def show(self):
         self._adjustText()
-        super().showEvent(event)
+        super().show()
         self.manager.add(self)
         self.startPosition = self.manager.slideStartPos(self)
         self.endPosition = self.manager.slideEndPos(self)

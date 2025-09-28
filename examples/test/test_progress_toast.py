@@ -4,7 +4,7 @@ from typing import Union
 
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
 from PySide6.QtGui import QColor, QPainter
-from PySide6.QtCore import Qt, Property, QPropertyAnimation, QRect, Signal
+from PySide6.QtCore import Qt, Property, QPropertyAnimation, QRect, Signal, QEvent
 
 from PySide6FluentUI import ToastInfoBar, isDarkTheme, PushButton, ToastInfoBarPosition, ToastInfoBarColor, \
     drawRoundRect, ColorPickerButton, BodyLabel, EditableComboBox
@@ -16,8 +16,10 @@ class ProgressToast(ToastInfoBar):
     progressChanged = Signal()
 
     def __init__(self, title, content, time: int,  position, orient, toastColor, parent, backgroundColor):
-        super().__init__(title, content, duration=-1, isClosable=True, position=position,
-                         orient=orient, toastColor=toastColor, parent=parent, backgroundColor=backgroundColor)
+        super().__init__(
+            title, content, duration=-1, isClosable=True, position=position,
+            orient=orient, toastColor=toastColor, parent=parent, backgroundColor=backgroundColor
+        )
         self._progress: int = 0
         self.__br: int = 0
         self.closeButton.setVisible(False)
@@ -31,6 +33,8 @@ class ProgressToast(ToastInfoBar):
         self.progressChanged.connect(self.update)
         self._progressAni.finished.connect(self.__onFinishedProgress)
 
+    def _adjustText(self): ...
+
     def __onFinishedProgress(self):
         self.__br = 8
         self.closeButton.setVisible(True)
@@ -38,12 +42,9 @@ class ProgressToast(ToastInfoBar):
         self.update()
         self.move(self.manager.slideEndPos(self))
 
-    def _adjustText(self): ...
-
-    def showEvent(self, event):
+    def show(self):
         super()._adjustText()
-        super().showEvent(event)
-        self.adjustSize()
+        super().show()
         self._progressAni.setEndValue(self.width())
         self._progressAni.start()
 
@@ -55,8 +56,6 @@ class ProgressToast(ToastInfoBar):
             return
         self.progressChanged.emit()
         self._progress = value
-
-    progress = Property(int, getValue, setValue)
 
     @classmethod
     def new(
@@ -136,6 +135,13 @@ class ProgressToast(ToastInfoBar):
     ):
         return cls.new(title, content, time, position, orient, toastColor, parent, backgroundColor)
 
+    def eventFilter(self, obj, event):
+        if obj is self.parent() and event.type() in [QEvent.Resize, QEvent.WindowStateChange]:
+            try:
+                self.move(self.manager.slideEndPos(self))
+            except Exception: ...
+        return super().eventFilter(obj, event)
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -147,6 +153,8 @@ class ProgressToast(ToastInfoBar):
 
         painter.setBrush(self.toastColor)
         drawRoundRect(painter, QRect(0, h - 10, self.getValue() + 1, 6), 0, 0, self.__br, 8)
+
+    progress = Property(int, getValue, setValue)
 
 
 class Window(Interface):

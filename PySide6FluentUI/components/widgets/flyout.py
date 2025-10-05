@@ -1,6 +1,6 @@
 # coding:utf-8
-from enum import Enum
 import sys
+from enum import Enum
 from typing import Union, Tuple
 
 from PySide6.QtCore import (

@@ -1,11 +1,109 @@
 # coding:utf-8
-from PySide6.QtWidgets import QSizePolicy
+from typing import List
+
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIntValidator
+from PySide6.QtWidgets import QSizePolicy, QWidget, QHBoxLayout
 
 from PySide6FluentUI import PopupDrawerWidget, PopupDrawerPosition, PushButton, DropDownColorPalette, ScreenColorPicker, \
-    FlyoutDialog, StrongBodyLabel, BodyLabel, TransparentToolButton, FluentIcon, HorizontalSeparator, HBoxLayout
+    FlyoutDialog, StrongBodyLabel, BodyLabel, TransparentToolButton, FluentIcon, HorizontalSeparator, HBoxLayout, \
+    SwitchButton, FlyoutPosition, LineEdit, PrimaryPushButton, ComboBox, ToastInfoBar, ToastInfoBarPosition
 
 from ..widgets.basic_interface import Interface
-from ..widgets.widget_item import StandardItem
+
+
+class DrawerSettingView(FlyoutDialog):
+    def __init__(self, target, parent=None):
+        super().__init__(target, FlyoutPosition.LEFT, parent)
+        self.parent = parent
+        self.setFixedSize(414, 256)
+        self.viewLayout.setContentsMargins(24, 24, 24, 24)
+        self.viewLayout.setSpacing(12)
+
+        self.durationLayout: QHBoxLayout = QHBoxLayout()
+        self.durationLabel: BodyLabel = BodyLabel("设置动画时长:", self)
+        self.durationLineEdit: LineEdit = LineEdit(self)
+
+        self.durationLineEdit.setFixedWidth(128)
+        self.durationLineEdit.setValidator(QIntValidator(self))
+        self.durationLayout.addWidget(self.durationLabel, 0, Qt.AlignLeft)
+        self.durationLayout.addWidget(self.durationLineEdit, 1, Qt.AlignRight)
+
+        self.clickOtherHideLayout: QHBoxLayout = QHBoxLayout()
+        self.clickOtherHideLabel: BodyLabel = BodyLabel("启用点击其他隐藏:", self)
+        self.clickOterHideSwitchButton: SwitchButton = SwitchButton(self)
+        self.clickOterHideSwitchButton.setChecked(True)
+
+        self.clickOterHideSwitchButton.setFixedWidth(128)
+        self.clickOtherHideLayout.addWidget(self.clickOtherHideLabel, 0, Qt.AlignLeft)
+        self.clickOtherHideLayout.addWidget(self.clickOterHideSwitchButton, 0, Qt.AlignRight)
+
+        self.radius: List[str] = [str(r) for r in range(0, 25)]
+        self.radiusLabel: BodyLabel = BodyLabel("设置圆角(左上, 右上, 右下, 左下)", self)
+
+        self.radiusLayout: QHBoxLayout = QHBoxLayout()
+        self.tlc = ComboBox(self)
+        self.trc = ComboBox(self)
+        self.brc = ComboBox(self)
+        self.blc = ComboBox(self)
+
+        self.tlc.addItems(self.radius)
+        self.trc.addItems(self.radius)
+        self.brc.addItems(self.radius)
+        self.blc.addItems(self.radius)
+
+        self.radiusLayout.addWidget(self.tlc)
+        self.radiusLayout.addWidget(self.trc)
+        self.radiusLayout.addWidget(self.brc)
+        self.radiusLayout.addWidget(self.blc)
+
+        self.applyButton: PrimaryPushButton = PrimaryPushButton("应用", self)
+
+        self.viewLayout.addLayout(self.durationLayout)
+        self.viewLayout.addLayout(self.clickOtherHideLayout)
+        self.viewLayout.addWidget(self.radiusLabel, 1, Qt.AlignHCenter)
+        self.viewLayout.addLayout(self.radiusLayout)
+        self.viewLayout.addWidget(self.applyButton, 1, Qt.AlignHCenter)
+
+        self.applyButton.clicked.connect(self.updateDrawer)
+
+    def updateDrawer(self):
+        try:
+            duration = int(self.durationLineEdit.text())
+        except ValueError:
+            duration = 300
+        clickedOtherHide = self.clickOterHideSwitchButton.isChecked()
+
+        self.parent.leftPopupDrawer.setClickParentHide(clickedOtherHide)
+        self.parent.topPopupDrawer.setClickParentHide(clickedOtherHide)
+        self.parent.rightPopupDrawer.setClickParentHide(clickedOtherHide)
+        self.parent.bottomPopupDrawer.setClickParentHide(clickedOtherHide)
+
+        self.parent.leftPopupDrawer.setDuration(duration)
+        self.parent.topPopupDrawer.setDuration(duration)
+        self.parent.rightPopupDrawer.setDuration(duration)
+        self.parent.bottomPopupDrawer.setDuration(duration)
+
+        self.parent.leftPopupDrawer.setRoundRadius(
+            int(self.tlc.currentText()), int(self.trc.currentText()), int(self.brc.currentText()), int(self.blc.currentText())
+        )
+        self.parent.topPopupDrawer.setRoundRadius(
+            int(self.tlc.currentText()), int(self.trc.currentText()), int(self.brc.currentText()), int(self.blc.currentText())
+        )
+        self.parent.rightPopupDrawer.setRoundRadius(
+            int(self.tlc.currentText()), int(self.trc.currentText()), int(self.brc.currentText()), int(self.blc.currentText())
+        )
+        self.parent.bottomPopupDrawer.setRoundRadius(
+            int(self.tlc.currentText()), int(self.trc.currentText()), int(self.brc.currentText()), int(self.blc.currentText())
+        )
+
+        ToastInfoBar.success(
+            "DrawerSetting",
+            "所有设置应用成功!🥰",
+            position=ToastInfoBarPosition.TOP,
+            parent=self.parent
+        )
+        self.hide()
 
 
 class DialogInterface(Interface):
@@ -14,15 +112,11 @@ class DialogInterface(Interface):
         self.setObjectName("DialogInterface")
         self.vBoxLayout.addWidget(self.scrollArea)
 
-        self.__initPopupDrawer()
-        self.__initDropDownColorPalette()
-        self.__initScreenColorPicker()
-        self.__initFlyoutDialog()
-        self.scrollLayout.addStretch(1)
-        self.connectSignalSlot()
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(3, 3, 3, 3)
+        layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
-    def __initPopupDrawer(self):
-        self.popupDrawerItem: StandardItem = StandardItem("抽屉组件", self)
         self.leftPopupDrawer: PopupDrawerWidget = PopupDrawerWidget("标题", parent=self)
         self.topPopupDrawer: PopupDrawerWidget = PopupDrawerWidget("标题", position=PopupDrawerPosition.TOP, parent=self)
         self.rightPopupDrawer: PopupDrawerWidget = PopupDrawerWidget("标题", position=PopupDrawerPosition.RIGHT, parent=self)
@@ -37,30 +131,31 @@ class DialogInterface(Interface):
         self.popRightDrawerButton: PushButton = PushButton("右侧", self)
         self.popTopDrawerButton: PushButton = PushButton("顶侧", self)
         self.popBottomDrawerButton: PushButton = PushButton("底侧", self)
+        self.popDrawerSettingButton: TransparentToolButton = TransparentToolButton(FluentIcon.SETTING, self)
 
-        self.popupDrawerItem.addWidget(self.popLeftDrawerButton)
-        self.popupDrawerItem.addWidget(self.popRightDrawerButton)
-        self.popupDrawerItem.addWidget(self.popTopDrawerButton)
-        self.popupDrawerItem.addWidget(self.popBottomDrawerButton)
+        self.drawerSettingView: DrawerSettingView = DrawerSettingView(self.popDrawerSettingButton, self)
 
-        self.scrollLayout.addWidget(self.popupDrawerItem)
+        layout.addWidget(self.popLeftDrawerButton)
+        layout.addWidget(self.popRightDrawerButton)
+        layout.addWidget(self.popTopDrawerButton)
+        layout.addWidget(self.popBottomDrawerButton)
+        layout.addWidget(self.popDrawerSettingButton, 1, Qt.AlignRight | Qt.AlignVCenter)
+        self.addExamplesCard(
+            "抽屉组件",
+            widget,
+            1
+        ).widget.widgetCard.viewLayout.setContentsMargins(11, 11, 11, 11)
 
-    def __initDropDownColorPalette(self):
-        self.colorPaletteItem: StandardItem = StandardItem("弹出调色盘", self)
-        self.colorPalette: DropDownColorPalette = DropDownColorPalette(self)
+        self.addExamplesCard(
+            "弹出调色盘",
+            DropDownColorPalette(self)
+        )
 
-        self.colorPaletteItem.addWidget(self.colorPalette)
-        self.scrollLayout.addWidget(self.colorPaletteItem)
+        self.addExamplesCard(
+            "屏幕拾色器",
+            ScreenColorPicker("deeppink", self)
+        )
 
-    def __initScreenColorPicker(self):
-        self.screenColorItem: StandardItem = StandardItem("屏幕拾色器", self)
-        self.screenColorPicker: ScreenColorPicker = ScreenColorPicker(self)
-
-        self.screenColorItem.addWidget(self.screenColorPicker)
-        self.scrollLayout.addWidget(self.screenColorItem)
-
-    def __initFlyoutDialog(self):
-        self.flyoutDialogItem: StandardItem = StandardItem("弹出对话框", self)
         self.targetButton: PushButton = PushButton("显示对话框", self)
         self.flyoutDialog: FlyoutDialog = FlyoutDialog(self.targetButton, parent=self)
 
@@ -87,14 +182,21 @@ class DialogInterface(Interface):
         hBoxlayout.addWidget(self.yesBtn)
         hBoxlayout.addWidget(self.closeBtn)
 
-        self.flyoutDialogItem.addWidget(self.targetButton)
-        self.scrollLayout.addWidget(self.flyoutDialogItem)
+        self.addExamplesCard(
+            "弹出对话框",
+            self.targetButton
+        )
+
+        self.scrollLayout.addStretch(1)
+        self.connectSignalSlot()
 
     def connectSignalSlot(self):
         self.popLeftDrawerButton.clicked.connect(self.leftPopupDrawer.toggleDrawer)
         self.popTopDrawerButton.clicked.connect(self.topPopupDrawer.toggleDrawer)
         self.popRightDrawerButton.clicked.connect(self.rightPopupDrawer.toggleDrawer)
         self.popBottomDrawerButton.clicked.connect(self.bottomPopupDrawer.toggleDrawer)
+        self.popDrawerSettingButton.clicked.connect(self.drawerSettingView.show)
+
         self.targetButton.clicked.connect(self.flyoutDialog.show)
         self.yesBtn.clicked.connect(self.flyoutDialog.hide)
         self.closeBtn.clicked.connect(self.flyoutDialog.hide)

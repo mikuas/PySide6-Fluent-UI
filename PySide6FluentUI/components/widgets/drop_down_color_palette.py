@@ -179,17 +179,20 @@ class DropDownColorPalette(ColorView):
 
     def __init__(self, parent=None, colors=[
         QColor("#FFFFFF"), QColor("#FF0000"), QColor("#00BFFF"), QColor("#00FF7F"), QColor("#FF00FF"),
-        QColor("#8A2BE2"), QColor("#A5A5A5"), QColor("#FFC000"), QColor("#EE9A00"), QColor("#70AD47")]):
+        QColor("#8A2BE2"), QColor("#A5A5A5"), QColor("#FFC000"), QColor("#EE9A00"), QColor("#70AD47")],
+                 defaultColor: Union[str, QColor] = themeColor()):
         super().__init__(parent=parent)
         from ..dialog_box import ColorDialog
         self.__lastButton: ColorItem = None
         self.__colors: List[QColor] = colors
         self.colorPaletteView: PopupView = PopupView(self)
 
+        self.__initColorPaletteView()
+        self.setDefaultColor(defaultColor)
+
         self.colorPaletteView.setFixedSize(346, 414)
         self.pickerColorButton.setIcon(FluentIcon.CHEVRON_DOWN_MED)
         self.pickerColorButton.setIconSize(QSize(12, 12))
-        self.__initColorPaletteView()
 
         self.colorDialog: ColorDialog = ColorDialog(self.defaultColor(), "选择颜色", self.window())
         self.colorDialog.hide()

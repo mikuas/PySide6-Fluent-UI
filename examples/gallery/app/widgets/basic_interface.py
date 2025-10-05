@@ -1,12 +1,120 @@
 # coding:utf-8
-from pathlib import Path
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLayout
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtGui import QDesktopServices, QPainter, QColor, QFont
 from PySide6FluentUI import TitleLabel, SubtitleLabel, CaptionLabel, PushButton, FluentIcon, ToolButton, \
-    setToolTipInfos, ToolTipPosition, ImageLabel, MessageBoxBase, toggleTheme, ScrollArea
+    setToolTipInfos, ToolTipPosition, ImageLabel, MessageBoxBase, toggleTheme, ScrollArea, isDarkTheme, drawRoundRect, \
+    setFont, BodyLabel, IconWidget
 
 from ..common.config import update
+
+
+class WidgetCard(QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setMinimumHeight(114)
+        self.viewLayout: QHBoxLayout = QHBoxLayout(self)
+        self.viewLayout.setContentsMargins(11, 11, 24, 11)
+        self.viewLayout.setSpacing(0)
+        self.viewLayout.setSizeConstraint(QHBoxLayout.SizeConstraint.SetMinimumSize)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        if isDarkTheme():
+            pc = 255
+            bc = 0
+            a = 32
+        else:
+            pc = 0
+            bc = 243
+            a = 170
+        painter.setPen(QColor(pc, pc, pc, 16))
+        painter.setBrush(QColor(bc, bc, bc, a))
+        drawRoundRect(painter, self.rect(), 10, 10, 0, 0)
+
+
+class CodeLinkCard(QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.isHover: bool = False
+        self.setMinimumHeight(57)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def enterEvent(self, event):
+        self.isHover = True
+        self.update()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.isHover = False
+        self.update()
+        super().leaveEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        if isDarkTheme():
+            pc = 255
+            bc = 52
+            a = 64
+        else:
+            pc = 0
+            bc = 255
+            a = 170
+        painter.setPen(QColor(pc, pc, pc, 16))
+        painter.setBrush(QColor(bc, bc, bc, a))
+        painter.setOpacity(0.678 if self.isHover else 1)
+        drawRoundRect(painter, self.rect(), 0, 0, 10, 10)
+
+    def mouseReleaseEvent(self, event):
+        QDesktopServices.openUrl("https://github.com/mikuas/PySide6-Fluent-UI.git")
+        super().mouseReleaseEvent(event)
+
+
+class CardWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.vBoxLayout: QVBoxLayout = QVBoxLayout(self)
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+        self.vBoxLayout.setSpacing(0)
+
+        self.widgetCard: WidgetCard = WidgetCard(self)
+        self.codeLineCard: CodeLinkCard = CodeLinkCard(self)
+
+        self.sourceTitle: BodyLabel = BodyLabel("源代码", self)
+        self.iconWidget: IconWidget = IconWidget(FluentIcon.LINK, self)
+        self.iconWidget.setFixedSize(16, 16)
+        layout: QHBoxLayout = QHBoxLayout(self.codeLineCard)
+        layout.addWidget(self.sourceTitle, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        layout.addWidget(self.iconWidget, 1, Qt.AlignRight | Qt.AlignVCenter)
+
+        self.vBoxLayout.addWidget(self.widgetCard, 1)
+        self.vBoxLayout.addWidget(self.codeLineCard, 0)
+
+
+class ExamplesCard(QWidget):
+    def __init__(self, title: str, widget: QWidget, stretch=0, parent=None):
+        super().__init__(parent)
+        self.vBoxLayout: QVBoxLayout = QVBoxLayout(self)
+        self.vBoxLayout.setSpacing(12)
+        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.title: SubtitleLabel = SubtitleLabel(title, self)
+        self.widget: CardWidget = CardWidget(self)
+
+        self.widget.widgetCard.viewLayout.addWidget(widget, 0)
+        self.vBoxLayout.addWidget(self.title)
+        self.vBoxLayout.addWidget(self.widget, 1)
+        # self.vBoxLayout.addStretch(1)
+
+        widget.setParent(self.widget.widgetCard)
+        if stretch == 0:
+            self.widget.widgetCard.viewLayout.addStretch(1)
+
+        setFont(self.title, 16, QFont.DemiBold)
 
 
 class PaymentMessageBox(MessageBoxBase):
@@ -98,11 +206,17 @@ class Interface(QWidget):
 
         self._widget.setContentsMargins(0, 0, 0, 0)
         self.scrollLayout.setContentsMargins(0, 0, 18, 0)
+        self.scrollLayout.setSpacing(18)
         self.scrollLayout.setAlignment(Qt.AlignTop)
     
     def initPaymentMessageBox(self):
         self.paymentMessageBox: PaymentMessageBox = PaymentMessageBox("支持作者", self.window())
         self.likeButton.clicked.connect(self.paymentMessageBox.show)
+
+    def addExamplesCard(self, title: str, widget: QWidget, stretch=0):
+        card = ExamplesCard(title, widget, stretch, self)
+        self.scrollLayout.addWidget(card)
+        return card
 
     @staticmethod
     def openUrl(url: str) -> bool:

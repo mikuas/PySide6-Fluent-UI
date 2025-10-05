@@ -192,7 +192,7 @@ class Window(Interface):
         self.button.clicked.connect(
             lambda: ProgressToast.custom(
                 "下载文件",
-                " 正在下载指定的文件,  坐下喝杯咖啡等待一下吧!!  ",
+                " 正在下载指定的文件,  坐下喝杯咖啡休息一下吧!!  ",
                 self.time,
                 ToastInfoBarPosition.TOP_RIGHT,
                 Qt.Orientation.Vertical,

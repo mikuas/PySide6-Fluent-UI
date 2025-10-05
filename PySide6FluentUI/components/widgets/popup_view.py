@@ -71,12 +71,6 @@ class PopupView(FrameView):
         self.aniGroup.start()
         super().showEvent(event)
 
-    def hideEvent(self, event):
-        self.opacityAni.setStartValue(1)
-        self.opacityAni.setEndValue(0)
-        self.opacityAni.start()
-        super().hideEvent(event)
-
     def _slideStartPos(self) -> QPoint:
         return self.__startPos
 

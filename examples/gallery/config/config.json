@@ -1,10 +1,10 @@
 {
     "MainWindow": {
         "AcrylicEnabled": false,
-        "MicaEnabled": true
+        "MicaEnabled": false
     },
     "QFluentWidgets": {
         "ThemeColor": "#ff4d94ff",
-        "ThemeMode": "Dark"
+        "ThemeMode": "Auto"
     }
 }

@@ -2,17 +2,15 @@
 from typing import Union
 from pynput import mouse
 
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QGraphicsDropShadowEffect, QHBoxLayout, QLayout, \
-    QFrame
-from PySide6.QtCore import Qt, QTimer, QRect, QSize, QThread, Signal, QPoint
-from PySide6.QtGui import QGuiApplication, QCursor, QPainter, QColor
+from PySide6.QtWidgets import QHBoxLayout
+from PySide6.QtCore import Qt, QTimer, QThread, Signal, QPoint
+from PySide6.QtGui import QGuiApplication, QCursor, QColor
 
 from .drop_down_color_palette import BaseItem, ColorView
 from .popup_view import FrameView
 from .label import BodyLabel
-from .button import TransparentToolButton
+from ...common.color import themeColor
 from ...common.icon import FluentIcon
-from ...common.style_sheet import isDarkTheme
 
 
 class MouseListenerThread(QThread):
@@ -74,9 +72,10 @@ class ScreenColorPickerView(FrameView):
 
 class ScreenColorPicker(ColorView):
 
-    def __init__(self, parent=None):
+    def __init__(self, defaultColor: Union[str, QColor] = themeColor(), parent=None):
         super().__init__(parent=parent)
         self.colorPickerView: ScreenColorPickerView = ScreenColorPickerView(self)
+        self.setDefaultColor(defaultColor)
         self.setCurrentColor(self.colorPickerView.color)
         self.widgetLayout.setContentsMargins(5, 4, 5, 4)
         self.pickerColorButton.setIcon(FluentIcon.COLOR_PICKER)

@@ -1,6 +1,6 @@
 # coding:utf-8
 from PySide6.QtWidgets import QWidget, QHBoxLayout
-from PySide6.QtGui import QColor, QPainter
+from PySide6.QtGui import QColor, QPainter, QIntValidator
 from PySide6.QtCore import Qt, Signal, QSize
 
 from .button import TransparentToolButton
@@ -50,13 +50,20 @@ class PageButton(QWidget):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
         painter.setPen(Qt.NoPen)
-        rect = self.rect()
+        rect = self.rect().adjusted(1, 1, -1, -1)
         isDark = isDarkTheme()
         c = 0 if isDark else 255
         if self._isSelected:
             painter.setBrush(themeColor())
         elif self._isHover:
-            painter.setBrush(QColor(46, 46, 46) if isDark else QColor(224, 224, 224))
+            if isDark:
+                pc = 255
+                bc = 46
+            else:
+                pc = 0
+                bc = 224
+            painter.setPen(QColor(pc, pc, pc, 64))
+            painter.setBrush(QColor(bc, bc, bc))
         painter.drawRoundedRect(rect, 6, 6)
         
         painter.setPen(QColor(c, c, c) if self._isSelected else (QColor(255, 255, 255) if isDark else QColor(0, 0, 0)))
@@ -106,6 +113,7 @@ class Pager(QWidget):
         self.countLabel: BodyLabel = BodyLabel(f"页 共计 {self.__pages} 页")
 
         self.jumpEdit: LineEdit = LineEdit(self)
+        self.jumpEdit.setValidator(QIntValidator(self))
         self.jumpEdit.setAlignment(Qt.AlignCenter)
         self.jumpEdit.setFixedWidth(64)
 

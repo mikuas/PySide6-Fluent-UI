@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout
 from PySide6.QtCore import Qt
 from PySide6FluentUI import ScrollArea, TitleLabel, SubtitleLabel, FluentWindow, SwitchSettingCard, \
     FluentIcon, OptionsSettingCard, setTheme, ColorSettingCard, qconfig, HyperlinkCard, PrimaryPushSettingCard, \
-    themeColor, setThemeColor
+    setThemeColor
 
 from ..common.config import cfg, isWin11, update
 

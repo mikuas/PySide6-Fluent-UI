@@ -375,7 +375,7 @@ class TopToastInfoBarManager(ToastInfoBarManager):
 
     def slideStartPos(self, toastInfoBar) -> QPoint:
         pos = self.slideEndPos(toastInfoBar)
-        return QPoint(pos.x(), pos.y() - toastInfoBar.height() // 3)
+        return QPoint(pos.x(), pos.y() - toastInfoBar.height() // 4)
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.TOP_LEFT)
@@ -421,7 +421,7 @@ class BottomToastInfoBarManager(ToastInfoBarManager):
 
     def slideStartPos(self, toastInfoBar: ToastInfoBar) -> QPoint:
         pos = self.slideEndPos(toastInfoBar)
-        return QPoint(pos.x(), pos.y() + toastInfoBar.height() // 3)
+        return QPoint(pos.x(), pos.y() + toastInfoBar.height() // 4)
 
 
 @ToastInfoBarManager.register(ToastInfoBarPosition.BOTTOM_LEFT)

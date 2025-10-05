@@ -1,6 +1,5 @@
 # coding:utf-8
 import sys
-from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
@@ -22,7 +21,6 @@ class MainWindow(FluentWindow):
         super().__init__()
 
         self.setWindowTitle("gallery")
-        # self.setWindowIcon(QIcon(str(Path(__file__).resolve().parents[1] / "resources" / "icons" / "app.ico")))
         self.setWindowIcon(QIcon(":/gallery/icons/app.ico"))
 
         self.translator: FluentTranslator = FluentTranslator()

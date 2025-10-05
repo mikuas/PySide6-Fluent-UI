@@ -1,21 +1,17 @@
 # coding:utf-8
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 
 from PySide6FluentUI import FillPushButton, ToastInfoBar, ToastInfoBarColor, ToastInfoBarPosition, themeColor, \
     MessageBoxBase, TransparentToolButton, FluentIcon, setToolTipInfo, ToolTipPosition, CaptionLabel, LineEdit, \
-    ComboBox, ColorPickerButton, FlyoutDialog, FlyoutPosition
+    ComboBox, ColorPickerButton
+from examples.test.test_progress_toast import ProgressToast
 from ..widgets.basic_interface import Interface
-from ..widgets.widget_item import StandardItem
 
 
 class TextDialog(MessageBoxBase):
-# class TextDialog(FlyoutDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-    # def __init__(self, target, position, parent):
-    #     super().__init__(target, position, parent, layout=QHBoxLayout)
         self.vBoxLayout.removeItem(self.viewLayout)
         self.viewLayout = QHBoxLayout()
         self.vBoxLayout.insertLayout(0, self.viewLayout, 1)
@@ -71,8 +67,13 @@ class StatusInterface(Interface):
         super().__init__("状态和信息", "PySide6FluentUI.components.widgets", parent)
         self.setObjectName("StatusInterface")
         self.vBoxLayout.addWidget(self.scrollArea)
+        self.orients = [Qt.Orientation.Vertical, Qt.Orientation.Horizontal]
 
-        self.toastInfoBarItem: StandardItem = StandardItem("吐司提示", self)
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+
         self.successToastButton: FillPushButton = FillPushButton("成功", self)
         self.errorToastButton: FillPushButton = FillPushButton("失败", self)
         self.warningToastButton: FillPushButton = FillPushButton("警告", self)
@@ -93,20 +94,28 @@ class StatusInterface(Interface):
         self.infoToastButton.setFixedWidth(64)
         self.customToastButton.setFixedWidth(82)
 
-        self.toastInfoBarItem.card.setFixedHeight(114)
-        self.toastInfoBarItem.addWidget(self.successToastButton)
-        self.toastInfoBarItem.addWidget(self.errorToastButton)
-        self.toastInfoBarItem.addWidget(self.warningToastButton)
-        self.toastInfoBarItem.addWidget(self.infoToastButton)
-        self.toastInfoBarItem.addWidget(self.customToastButton)
-        self.toastInfoBarItem.addWidget(self.editTextButton, 1, Qt.AlignRight | Qt.AlignVCenter)
-
-        self.scrollLayout.addWidget(self.toastInfoBarItem)
+        layout.addWidget(self.successToastButton)
+        layout.addWidget(self.errorToastButton)
+        layout.addWidget(self.warningToastButton)
+        layout.addWidget(self.infoToastButton)
+        layout.addWidget(self.customToastButton)
+        layout.addWidget(self.editTextButton, 1, Qt.AlignRight | Qt.AlignVCenter)
 
         setToolTipInfo(self.editTextButton, "编辑", 3000, ToolTipPosition.TOP)
-        self.connectSignalSlot()
+        self.addExamplesCard(
+            "吐司提示",
+            widget,
+            1
+        )
 
-        self.orients = [Qt.Orientation.Vertical, Qt.Orientation.Horizontal]
+        self.progressButton: FillPushButton = FillPushButton("显示进度", self)
+        self.addExamplesCard(
+            "吐司任务进度条",
+            self.progressButton,
+        )
+
+        self.scrollLayout.addStretch(1)
+        self.connectSignalSlot()
 
     def connectSignalSlot(self):
         self.successToastButton.clicked.connect(
@@ -164,3 +173,15 @@ class StatusInterface(Interface):
         self.editTextButton.clicked.connect(self.textDialog.exec)
         # self.editTextButton.clicked.connect(self.textDialog.show)
         self.textDialog.colorPickButton.colorChanged.connect(self.customToastButton.setFillColor)
+
+        self.progressButton.clicked.connect(
+            lambda: ProgressToast.custom(
+                self.textDialog.titleEdit.text(),
+                self.textDialog.connectEdit.text(),
+                time=int(self.textDialog.durationComboBox.currentText()),
+                orient=self.orients[self.textDialog.orientComboBox.currentIndex()],
+                position=ToastInfoBarPosition.TOP,
+                toastColor=self.textDialog.colorPickButton.color,
+                parent=self
+            )
+        )

@@ -1,5 +1,5 @@
 # coding:utf-8
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QDesktopServices, QPainter, QColor, QFont
 from PySide6FluentUI import TitleLabel, SubtitleLabel, CaptionLabel, PushButton, FluentIcon, ToolButton, \

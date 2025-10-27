@@ -73,9 +73,9 @@ class PipsDelegate(QStyledItemDelegate):
         painter.setBrush(color)
 
         if option.state & QStyle.State_Selected or (isHover and not isPressed):
-            r = 4
-        else:
             r = 3
+        else:
+            r = 2
 
         x = option.rect.x() + 6 - r
         y = option.rect.y() + 6 - r
@@ -158,8 +158,8 @@ class PipsPager(QListWidget):
 
         self.setPreviousButtonDisplayMode(PipsScrollButtonDisplayMode.NEVER)
         self.setNextButtonDisplayMode(PipsScrollButtonDisplayMode.NEVER)
-        self.preButton.setToolTip(self.tr('上一页'))
-        self.nextButton.setToolTip(self.tr('下一页'))
+        self.preButton.setToolTip(self.tr('Previous Page'))
+        self.nextButton.setToolTip(self.tr('Next Page'))
 
         # connect signal to slot
         self.preButton.clicked.connect(self.scrollPrevious)

@@ -1,6 +1,5 @@
 # coding:utf-8
-from PySide6.QtCore import Qt
-from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge, InfoBadgePosition
+from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge
 
 from ..widgets.basic_interface import Interface
 

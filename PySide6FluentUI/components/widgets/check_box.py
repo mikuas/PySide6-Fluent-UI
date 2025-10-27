@@ -5,6 +5,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QCheckBox, QStyle, QStyleOptionButton, QWidget
 
+from ... import setFont
 from ...common.icon import FluentIconBase, Theme, getIconColor
 from ...common.style_sheet import FluentStyleSheet, isDarkTheme, ThemeColor, themeColor, setCustomStyleSheet
 from ...common.overload import singledispatchmethod
@@ -47,6 +48,7 @@ class CheckBox(QCheckBox):
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+        setFont(self)
         FluentStyleSheet.CHECK_BOX.apply(self)
         self.isPressed = False
         self.isHover = False

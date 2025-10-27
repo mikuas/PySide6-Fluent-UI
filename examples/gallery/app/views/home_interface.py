@@ -1,5 +1,4 @@
 # coding:utf-8
-from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6FluentUI import VerticalScrollWidget, ImageLabel
 

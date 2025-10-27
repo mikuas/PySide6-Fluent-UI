@@ -47,7 +47,6 @@ class SliderHandle(QWidget):
     def leaveEvent(self, e):
         self._startAni(5)
         self.level.emit()
-        # print('level')
 
     def mousePressEvent(self, e):
         self._startAni(4)

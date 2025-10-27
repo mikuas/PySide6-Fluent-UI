@@ -5,8 +5,9 @@ from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 from PySide6FluentUI import FillPushButton, ToastInfoBar, ToastInfoBarColor, ToastInfoBarPosition, themeColor, \
     MessageBoxBase, TransparentToolButton, FluentIcon, setToolTipInfo, ToolTipPosition, CaptionLabel, LineEdit, \
     ComboBox, ColorPickerButton
-from examples.test.test_progress_toast import ProgressToast
+
 from ..widgets.basic_interface import Interface
+from ..widgets.test_progress_toast import ProgressToast
 
 
 class TextDialog(MessageBoxBase):

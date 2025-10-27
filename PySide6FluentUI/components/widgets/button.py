@@ -1,8 +1,9 @@
 # coding:utf-8
+import re
 from typing import Union, Tuple
 
 from PySide6.QtCore import Signal, QUrl, Qt, QRectF, QSize, QPoint, Property, QRect
-from PySide6.QtGui import QDesktopServices, QIcon, QPainter, QColor, QPainterPath, QFontMetrics, QPen
+from PySide6.QtGui import QDesktopServices, QIcon, QPainter, QColor, QPainterPath, QFontMetrics, QPen, QMouseEvent
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QRadioButton, QToolButton, QApplication, QWidget, QSizePolicy
 
 from ...common.animation import TranslateYAnimation
@@ -1116,82 +1117,46 @@ class PillToolButton(ToggleToolButton, PillButtonBase):
 
 class RoundButtonBase: # New
 
-    def setRoundRadius(self, tl: float, tr: float, br: float, bl: float):
-        self.__tl, self.__tr, self.__br, self.__bl = tl, tr, br, bl
-        self.update()
-
-    def roundRadius(self):
-        return self.__tl, self.__tr, self.__br, self.__bl
-
-    def setBorderColor(self, color: Union[str, QColor]) -> None:
-        if isinstance(color, str):
-            color = QColor(color)
-        self.__borderColor = color
-        self.update()
-
-    def borderColor(self) -> QColor:
-        return self.__borderColor
-
-    def mousePressEvent(self, e):
-        super().mousePressEvent(e)
-        self.update()
-
-    def mouseReleaseEvent(self, e):
-        super().mouseReleaseEvent(e)
-        self.update()
-
-    def sizeHint(self):
-        return super().sizeHint() + QSize(48, 0)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        rect = self.rect()
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
-        color = self._drawBorder(painter, rect)
-        alignment = Qt.AlignmentFlag.AlignCenter
-        if not self.icon().isNull():
-            rect, alignment = self._drawIcon(painter, rect)
-        self._drawText(painter, color, rect, alignment)
-
     def _postInit(self):
-        self.__tl, self.__tr, self.__br, self.__bl = 16, 16, 16, 16
-        self.__borderColor: QColor = None
-        self._fontMetrics: QFontMetrics = QFontMetrics(self.font())
-        self.setFixedHeight(35)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        super()._postInit()
+        self.tl, self.tr, self.bl, self.br = 12, 12, 12, 12
+        qconfig.themeChangedFinished.connect(self.__updateRadius)
 
-    def _drawBorder(self, painter: QPainter, rect: QRect) -> int:
-        if isDarkTheme():
-            pc, bc, alpha = 255, 48, 32
-        else:
-            pc, bc, alpha = 0, 243, 170
-        pen = QPen(self.borderColor() or QColor(pc, pc, pc, 32))
-        pen.setWidthF(1.5)
-        painter.setPen(pen)
-        painter.setBrush(QColor(bc, bc, bc, alpha))
-        if not self.isEnabled():
-            painter.setOpacity(0.3628)
-        elif self.isPressed:
-            painter.setOpacity(0.657)
-        else:
-            painter.setOpacity(1.0)
-        drawRoundRect(painter, rect.adjusted(1, 1, -1, -1), *self.roundRadius())
-        return pc
+    def __updateRadius(self):
+        qss = self.styleSheet()
+        radius = {
+            "top-left": self.tl,
+            "top-right": self.tr,
+            "bottom-left": self.bl,
+            "bottom-right": self.br
+        }
+        for i in ["top", "bottom"]:
+            for j in ["left", "right"]:
+                qss = re.sub(fr"border-{i}-{j}-radius:\s*\d+px;", f"border-{i}-{j}-radius: {radius[f"{i}-{j}"]}px;", qss)
 
-    def _drawIcon(self, painter: QPainter, rect: QRect) -> Tuple[QRect, Qt.AlignmentFlag]:
-        size = self.iconSize().width()
-        if self.text():
-            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
-        else:
-            x = (self.width() - size) / 2
-        y = (self.height() - size) / 2
-        drawIcon(self._icon, painter, QRect(x, y, size, size))
-        rect.adjust(x + size + 6, 0, 0, 0)
-        return rect, Qt.AlignVCenter
+        print(qss)
+        self.setStyleSheet(qss)
 
-    def _drawText(self, painter: QPainter, color: int, rect: QRect, alignment: Qt.AlignmentFlag) -> None:
-        painter.setPen(QColor(color, color, color))
-        painter.drawText(rect, alignment, self.text())
+    def paintEvent(self, e):
+        super().paintEvent(e)
+        self._drawBorder()
+
+    def _drawBorder(self):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(QColor(255, 255, 255, 32) if isDarkTheme() else QColor(32, 32, 32, 16))
+        painter.setBrush(Qt.NoBrush)
+        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), *self.radius())
+
+    def radius(self):
+        return self.tl, self.tr, self.br, self.bl
+
+    def setRadius(self, tl: int, tr: int, br: int, bl: int):
+        r = min(self.width(), self.height()) / 2
+        if tl > r or tr > r or br > r or bl > r:
+            return
+        self.tl, self.tr, self.br, self.bl = tl, tr, br, bl
+        self.__updateRadius()
 
 
 class RoundPushButton(RoundButtonBase,  PushButton): # New
@@ -1214,32 +1179,17 @@ class RoundToolButton(RoundButtonBase, ToolButton): # New
     * RoundToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
     """
 
-    def setText(self, text): ...
-
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, align: Qt.AlignmentFlag): ...
-
 
 class FillButtonBase(RoundButtonBase): # New
 
     def _postInit(self):
         super()._postInit()
-        self.setRoundRadius(6, 6, 6, 6)
+        try:
+            self.setFlat(True)
+        except AttributeError: ...
         self.__fillColor: QColor = None
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        rect = self.rect()
-        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
-        color = 0 if isDarkTheme() and self.isEnabled() else 255
-        alignment = Qt.AlignCenter
-        self._drawBackground(painter)
-        if not self.icon().isNull():
-            rect, alignment = self._drawIcon(painter, rect)
-        self._drawText(painter, color, rect, alignment)
-
-    def setBorderColor(self, color: Union[str, QColor]): ...
-
-    def setFillColor(self, color: Union[str, QColor]) -> None:
+    def setFillColor(self, color: Union[str, QColor]):
         if isinstance(color, str):
             color = QColor(color)
         if color == self.__fillColor:
@@ -1247,33 +1197,19 @@ class FillButtonBase(RoundButtonBase): # New
         self.__fillColor = color
         self.update()
 
-    def fillColor(self) -> QColor:
-        return self.__fillColor or themeColor()
-
-    def _drawBackground(self, painter: QPainter) -> None:
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(self.__fillColor or themeColor())
         if not self.isEnabled():
             painter.setOpacity(0.345)
         elif self.isPressed:
             painter.setOpacity(0.567)
         elif self.isHover:
-            painter.setOpacity(0.867)
-        drawRoundRect(painter, self.rect(), *self.roundRadius())
-
-    def _drawIcon(self, painter: QPainter, rect: QRect):
-        size = self.iconSize().width()
-        if self.text():
-            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
-        else:
-            x = (self.width() - size) / 2
-        y = (self.height() - size) / 2
-        icon = self._icon
-        if isinstance(self._icon, FluentIconBase):
-            icon = self._icon.icon(Theme.LIGHT if isDarkTheme() else Theme.DARK)
-        drawIcon(icon, painter, QRect(x, y, size, size))
-        rect.adjust(x + size + 6, 0, 0, 0)
-        return rect, Qt.AlignVCenter
+            painter.setOpacity(0.768)
+        painter.setBrush(self.__fillColor or themeColor())
+        painter.drawRoundedRect(QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), 8, 8)
+        super().paintEvent(e)
 
 
 class FillPushButton(FillButtonBase, PushButton): # New
@@ -1296,76 +1232,37 @@ class FillToolButton(FillButtonBase, ToolButton): # New
     * FillToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
     """
 
-    def setText(self, text): ...
-
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag): ...
-
 
 class OutlineButtonBase: # New
 
     checkedChange: Signal = Signal(bool)
 
-    def setOutlineColor(self, color: str | QColor) -> None:
-        if isinstance(color, str):
-            color = QColor(color)
-        self.__outlineColor = color
-        self.update()
-
-    def setChecked(self, isChecked: bool) -> None:
-        super().setChecked(isChecked)
-        self.checkedChange.emit(isChecked)
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        rect = self.rect()
-        painter.setRenderHint(QPainter.Antialiasing | QPainter.TextAntialiasing)
-        color = self._drawBorder(painter, rect)
-        alignment = Qt.AlignmentFlag.AlignCenter
-        if not self.icon().isNull():
-            rect, alignment = self._drawIcon(painter, rect, color)
-        self._drawText(painter, color, rect, alignment)
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        self.checkedChange.emit(self.isChecked())
 
     def _postInit(self):
         super()._postInit()
-        self.__outlineColor: QColor = None
-        self.__lastColor: QColor = None
         self.setCheckable(True)
-        self.toggled.connect(self.setChecked)
+        self.__outlineColor: QColor = None
 
-    def _drawIcon(self, painter: QPainter, rect: QRect, color: QColor) -> Tuple[QRect, Qt.AlignmentFlag]:
-        if isinstance(self._icon, FluentIconBase) and self.__lastColor != color:
-            self._icon = self._icon.colored(color, color)
-            self.__lastColor = QColor(color)
-        size = self.iconSize().width()
-        if self.text():
-            x = (self.width() - self._fontMetrics.horizontalAdvance(self.text()) - size * 2) / 2
-        else:
-            x = (self.width() - size) / 2
-        y = (self.height() - size) / 2
-        drawIcon(self._icon, painter, QRect(x, y, size, size))
-        rect.adjust(x + size + 6, 0, 0, 0)
-        return rect, Qt.AlignVCenter
+    def setOutlineColor(self, color: str | QColor) -> None:
+        if isinstance(color, str):
+            color = QColor(color)
+        if color == self.__outlineColor:
+            return
+        self.__outlineColor = color
+        self.update()
 
-    def _drawBorder(self, painter: QPainter, rect: QRect) -> QColor:
+    def _drawBorder(self):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         color = 255 if isDarkTheme() else 0
         color = (self.__outlineColor or themeColor()) if self.isChecked() else QColor(color, color, color, 24)
         pen = QPen(color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
-        if not self.isEnabled():
-            painter.setOpacity(0.3628)
-        elif self.isHover:
-            painter.setOpacity(0.657)
-        else:
-            painter.setOpacity(1.0)
-        drawRoundRect(painter, rect.adjusted(1, 1, -1, -1), *self.roundRadius())
-        return color
-
-    def _drawText(self, painter: QPainter, color: QColor, rect: QRect, alignment: Qt.AlignmentFlag) -> None:
-        color.setAlpha(255)
-        painter.setPen(color)
-        painter.drawText(rect, alignment, self.text())
+        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.8, 0.8, -0.8, -0.8), *self.radius())
 
 
 class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
@@ -1377,7 +1274,7 @@ class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
     * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * OutlinePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
-
+    
 
 class OutlineToolButton(OutlineButtonBase, RoundToolButton): # New
     """ Outline ToolButton

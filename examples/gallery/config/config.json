@@ -4,7 +4,12 @@
         "MicaEnabled": false
     },
     "QFluentWidgets": {
+        "FontFamilies": [
+            "Segoe UI",
+            "Microsoft YaHei",
+            "PingFang SC"
+        ],
         "ThemeColor": "#ff4d94ff",
-        "ThemeMode": "Auto"
+        "ThemeMode": "Dark"
     }
 }

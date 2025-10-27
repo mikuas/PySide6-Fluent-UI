@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QSize, QRectF, QStringListModel
 from PySide6.QtGui import QPainter, QColor
 from PySide6FluentUI import RoundListView, isDarkTheme, RoundListWidget, Splitter
 
-from examples.wiindow.splitWidget.demo import Interface
+from examples.window.splitWidget.demo import Interface
 
 
 class Window(Interface):

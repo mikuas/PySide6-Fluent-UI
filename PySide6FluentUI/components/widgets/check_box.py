@@ -5,9 +5,9 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QCheckBox, QStyle, QStyleOptionButton, QWidget
 
-from ... import setFont
+from ...common.font import setFont
 from ...common.icon import FluentIconBase, Theme, getIconColor
-from ...common.style_sheet import FluentStyleSheet, isDarkTheme, ThemeColor, themeColor, setCustomStyleSheet
+from ...common.style_sheet import FluentStyleSheet, isDarkTheme, ThemeColor, setCustomStyleSheet
 from ...common.overload import singledispatchmethod
 from ...common.color import fallbackThemeColor, validColor
 

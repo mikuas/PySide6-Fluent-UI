@@ -5,7 +5,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
 
 from PySide6FluentUI import ScreenColorPicker, themeColor
-from examples.wiindow.splitWidget.demo import Interface
+from examples.window.splitWidget.demo import Interface
 
 
 class Window(Interface):

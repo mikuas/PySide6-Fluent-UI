@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, QPoint, QEasingCurve
 
 from PySide6FluentUI import SplitWidget, PopupView, BodyLabel, HorizontalSeparator, TransparentToolButton, \
     FluentIcon, StrongBodyLabel, PushButton
-from examples.wiindow.splitWidget.demo import Interface
+from examples.window.splitWidget.demo import Interface
 
 
 class FlyoutPosition(Enum):

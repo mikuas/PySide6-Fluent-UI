@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, Property, QPropertyAnimation, QRect, Signal, QEve
 
 from PySide6FluentUI import ToastInfoBar, isDarkTheme, PushButton, ToastInfoBarPosition, ToastInfoBarColor, \
     drawRoundRect, ColorPickerButton, BodyLabel, EditableComboBox
-from examples.wiindow.splitWidget.demo import Interface
+from examples.window.splitWidget.demo import Interface
 
 
 class ProgressToast(ToastInfoBar):

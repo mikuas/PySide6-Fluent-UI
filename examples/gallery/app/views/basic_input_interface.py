@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from PySide6FluentUI import FluentIcon, RoundPushButton, RoundToolButton, FillPushButton, FillToolButton, \
     OutlinePushButton, OutlineToolButton, LabelLineEdit, PinBox, MultiSelectionComboBox, \
-    SubtitleRadioButton, ToolTipSlider
+    SubtitleRadioButton, ToolTipSlider, PushButton
 
 from ..widgets.basic_interface import Interface
 
@@ -17,6 +17,12 @@ class BasicInputInterface(Interface):
         super().__init__("基本输入", "PySide6FluentUI.components.widgets", parent)
         self.setObjectName("BasicInputInterface")
         self.vBoxLayout.addWidget(self.scrollArea)
+
+        """ push button """
+        self.addExamplesCard(
+            "标准按钮",
+            PushButton(FluentIcon.HOME, "标准按钮", self)
+        )
 
         """ round push button """
         self.addExamplesCard(

@@ -1,8 +1,10 @@
-from PySide6.QtCore import QRect
+from typing import Union
+
+from PySide6.QtCore import QRect, QRectF
 from PySide6.QtGui import QPainterPath, QPainter
 
 
-def drawRoundRect(painter: QPainter, rect: QRect, tl: float, tr: float, br: float, bl: float) -> None:
+def drawRoundRect(painter: QPainter, rect: Union[QRect, QRectF], tl: float, tr: float, br: float, bl: float) -> None:
     path = QPainterPath()
 
     path.moveTo(rect.left() + tl, rect.top())

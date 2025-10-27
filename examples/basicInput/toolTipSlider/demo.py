@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, Q
 from PySide6.QtGui import QColor, QPainter, QFontMetrics
 from PySide6.QtCore import Qt, QPoint, QTimer, QSize
 
-from examples.wiindow.splitWidget.demo import Interface
+from examples.window.splitWidget.demo import Interface
 from PySide6FluentUI import Slider, isDarkTheme, ToolTipSlider
 
 

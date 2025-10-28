@@ -5,7 +5,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='PySide6-Fluent-UI',
-    version='0.0.4',
+    version='0.0.5',
     author='Mikuas',
     packages=find_packages(),
     description="A fluent design widgets library based on PySide6",

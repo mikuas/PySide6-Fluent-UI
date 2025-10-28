@@ -2,7 +2,7 @@
 from PySide6.QtGui import QPixmap, QPainter, QPainterPath, Qt
 
 
-def customRoundPixmap(image: str, r1: int, r2: int, r3: int, r4: int) -> QPixmap:
+def customRoundPixmap(image: str, tl: int, tr: int, br: int, bl: int) -> QPixmap:
     pixmap = QPixmap(image)
     w, h = pixmap.width(), pixmap.height()
 
@@ -13,15 +13,15 @@ def customRoundPixmap(image: str, r1: int, r2: int, r3: int, r4: int) -> QPixmap
     painter.setRenderHint(QPainter.Antialiasing)
     path = QPainterPath()
 
-    path.moveTo(r1, 0)
-    path.lineTo(w - r2, 0)
-    path.quadTo(w, 0, w, r2)
-    path.lineTo(w, h - r3)
-    path.quadTo(w, h, w - r3, h)
-    path.lineTo(r4, h)
-    path.quadTo(0, h, 0, h - r4)
-    path.lineTo(0, r1)
-    path.quadTo(0, 0, r1, 0)
+    path.moveTo(tl, 0)
+    path.lineTo(w - tr, 0)
+    path.quadTo(w, 0, w, tr)
+    path.lineTo(w, h - br)
+    path.quadTo(w, h, w - br, h)
+    path.lineTo(bl, h)
+    path.quadTo(0, h, 0, h - bl)
+    path.lineTo(0, tl)
+    path.quadTo(0, 0, tl, 0)
     path.closeSubpath()
 
     painter.setClipPath(path)

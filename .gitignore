@@ -1,1 +1,4 @@
 /examples/gallery/resources/images/
+/examples/ImageCropper/bin
+/build
+/dist

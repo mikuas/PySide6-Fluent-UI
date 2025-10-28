@@ -1,10 +1,9 @@
 # coding:utf-8
-import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout
-from PySide6.QtGui import QColor, QIntValidator
+from PySide6.QtWidgets import QHBoxLayout
+from PySide6.QtGui import QIntValidator
 from PySide6.QtCore import Qt
 
-from PySide6FluentUI import FlyoutDialog, EditableComboBox, SubtitleLabel
+from PySide6FluentUI import FlyoutDialog, EditableComboBox, SubtitleLabel, PrimaryPushButton
 
 
 class OptionView(FlyoutDialog):
@@ -21,21 +20,17 @@ class OptionView(FlyoutDialog):
 
         self.intValidator: QIntValidator = QIntValidator(self)
 
-        self.tlc.setValidator(self.intValidator)
-        self.trc.setValidator(self.intValidator)
-        self.brc.setValidator(self.intValidator)
-        self.blc.setValidator(self.intValidator)
-
-        self.radius: list[str] = [str(r) for r in range(0, 25)]
-
-        self.tlc.addItems(self.radius)
-        self.trc.addItems(self.radius)
-        self.brc.addItems(self.radius)
-        self.blc.addItems(self.radius)
+        radius: list[str] = [str(r * 8) for r in range(0, 25)]
+        self.comboBoxs = [self.tlc, self.trc, self.brc, self.blc]
+        for c in self.comboBoxs:
+            c.setValidator(self.intValidator)
+            c.addItems(radius)
+            c.setCurrentText("64")
 
         self.radiusLabel: SubtitleLabel = SubtitleLabel("设置圆角弧度(左上, 右上, 右下, 左下)", self)
+        self.applyButton: PrimaryPushButton = PrimaryPushButton("应用", self)
 
-        self.viewLayout.addWidget(self.radiusLabel)
+        self.viewLayout.addWidget(self.radiusLabel, 1, Qt.AlignHCenter)
 
         hBoxLayout: QHBoxLayout = QHBoxLayout()
         hBoxLayout.addWidget(self.tlc)
@@ -43,8 +38,7 @@ class OptionView(FlyoutDialog):
         hBoxLayout.addWidget(self.brc)
         hBoxLayout.addWidget(self.blc)
         self.viewLayout.addLayout(hBoxLayout)
+        self.viewLayout.addWidget(self.applyButton)
 
-    def getRadius(self) -> list[int]:
-        return [
-            int(self.tlc.currentText()), int(self.trc.currentText()), int(self.brc.currentText()), int(self.blc.currentText())
-        ]
+    def getRadius(self):
+        return int(self.tlc.currentText()), int(self.trc.currentText()), int(self.brc.currentText()), int(self.blc.currentText())

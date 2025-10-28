@@ -1,32 +1,39 @@
 # coding:utf-8
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QHBoxLayout
 from PySide6.QtGui import QPixmap, QPainter, QPainterPath
 from PySide6.QtCore import Qt
 
-from PySide6FluentUI import FlyoutDialog, SubtitleLabel
+from PySide6FluentUI import FlyoutDialog, SubtitleLabel, TransparentToolButton, FluentIcon
 
 
 class ImageWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.viewLayout: QVBoxLayout = QVBoxLayout(self)
+        self.setMinimumWidth(256)
+        self.viewLayout: QHBoxLayout = QHBoxLayout(self)
         self.pixmap: QPixmap = QPixmap()
         self.sizeLabel: SubtitleLabel = SubtitleLabel("大小: 未知", self)
+        self.closeButton: TransparentToolButton = TransparentToolButton(FluentIcon.CLOSE, self)
         self.sizeLabel.setFontSize(16)
         self.tl, self.tr, self.br, self.bl = 0, 0, 0, 0
 
-        self.viewLayout.addWidget(self.sizeLabel, 1, Qt.AlignTop | Qt.AlignHCenter)
+        self.viewLayout.addWidget(self.sizeLabel, 1, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignLeft)
+        self.viewLayout.addWidget(self.closeButton, 1, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignRight)
 
     def updateImage(self, path: str):
         self.pixmap = QPixmap(path)
         size = self.pixmap.size()
-        self.sizeLabel.setText(f"大小: {size.width()}x{size.height()}")
-        self.parent().setFixedSize(size.width() // 3, size.height() // 3 + 48)
+        w, h = size.width(), size.height()
+        self.sizeLabel.setText(f"大小: {w}x{h}")
+
+        scaled = (800, 520) if w - h > 128 else (600, 600)
+        self.pixmap.scaled(*scaled, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.parent().setFixedSize(*scaled)
         self.update()
 
     def updateRadius(self, tl: int, tr: int, br: int, bl: int):
-        self.tl, self.tr, self.br, self.bl = tl, tr, br, bl
+        self.tl, self.tr, self.br, self.bl = tl // 3, tr // 3, br // 3, bl // 3
         self.update()
 
     def paintEvent(self, event):
@@ -57,3 +64,5 @@ class PreviewWidget(FlyoutDialog):
 
         self.imageWidget: ImageWidget = ImageWidget(self)
         self.viewLayout.addWidget(self.imageWidget, 1)
+
+        self.imageWidget.closeButton.clicked.connect(self.hide)

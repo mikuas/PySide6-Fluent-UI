@@ -23,7 +23,7 @@ class Interface(SplitWidget):
         self.enableMicaEffectButton.setFixedSize(46, 32)
 
         self.titleBar.hBoxLayout.insertWidget(4, self.toggleThemeButton)
-        self.titleBar.hBoxLayout.insertWidget(6, self.enableMicaEffectButton)
+        self.titleBar.hBoxLayout.insertWidget(5, self.enableMicaEffectButton)
 
         setToolTipInfo(self.toggleThemeButton, "切换当前主题", 2500)
         setToolTipInfo(self.enableMicaEffectButton, "启用MicaEffect", 2500)

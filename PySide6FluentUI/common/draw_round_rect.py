@@ -4,7 +4,7 @@ from PySide6.QtCore import QRect, QRectF
 from PySide6.QtGui import QPainterPath, QPainter
 
 
-def drawRoundRect(painter: QPainter, rect: Union[QRect, QRectF], tl: float, tr: float, br: float, bl: float) -> None:
+def drawRoundRect(painter: QPainter, rect: Union[QRect, QRectF], tl: Union[int, float], tr: Union[int, float], br: Union[int, float], bl: Union[int, float]) -> None:
     path = QPainterPath()
 
     path.moveTo(rect.left() + tl, rect.top())

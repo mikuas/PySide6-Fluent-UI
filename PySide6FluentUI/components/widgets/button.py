@@ -1133,8 +1133,6 @@ class RoundButtonBase: # New
         for i in ["top", "bottom"]:
             for j in ["left", "right"]:
                 qss = re.sub(fr"border-{i}-{j}-radius:\s*\d+px;", f"border-{i}-{j}-radius: {radius[f"{i}-{j}"]}px;", qss)
-
-        print(qss)
         self.setStyleSheet(qss)
 
     def paintEvent(self, e):
@@ -1184,10 +1182,24 @@ class FillButtonBase(RoundButtonBase): # New
 
     def _postInit(self):
         super()._postInit()
+        self.setRadius(6, 6, 6, 6)
         try:
             self.setFlat(True)
         except AttributeError: ...
         self.__fillColor: QColor = None
+
+    def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
+        if icon is None or (isinstance(icon, QIcon) and icon.isNull()):
+            self.setProperty('hasIcon', False)
+        else:
+            self.setProperty('hasIcon', True)
+
+        if isinstance(icon, FluentIconBase):
+            icon = icon.colored(QColor(255, 255, 255), QColor(0, 0, 0))
+
+        self.setStyle(QApplication.style())
+        self._icon = icon or QIcon()
+        self.update()
 
     def setFillColor(self, color: Union[str, QColor]):
         if isinstance(color, str):
@@ -1208,7 +1220,7 @@ class FillButtonBase(RoundButtonBase): # New
         elif self.isHover:
             painter.setOpacity(0.768)
         painter.setBrush(self.__fillColor or themeColor())
-        painter.drawRoundedRect(QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), 8, 8)
+        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.55, 0.55, -0.55, -0.55), *self.radius())
         super().paintEvent(e)
 
 

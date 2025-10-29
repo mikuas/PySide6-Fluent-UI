@@ -1,7 +1,7 @@
 # coding: utf-8
 from typing import List, Union
 from PySide6.QtCore import QSize, Qt, QRectF, Signal, QPoint, QTimer, QEvent, QAbstractItemModel, Property, QModelIndex
-from PySide6.QtGui import QPainter, QPainterPath, QIcon, QColor, QAction
+from PySide6.QtGui import QPainter, QPainterPath, QIcon, QColor, QAction, QPen
 from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLineEdit, QToolButton, QTextEdit,
                                QPlainTextEdit, QCompleter, QStyle, QWidget, QTextBrowser)
 
@@ -589,3 +589,19 @@ class LabelLineEdit(LineEdit):
 
     def suffix(self) -> str:
         return self._suffixLabel.text()
+
+
+class FocusLineEdit(LineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def paintEvent(self, e):
+        QLineEdit.paintEvent(self, e)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        c = 255 if isDarkTheme() else 0
+        pen = QPen(self.focusedBorderColor() if self.hasFocus() else QColor(c, c, c, 32))
+        pen.setWidth(2)
+        painter.setPen(pen)
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)

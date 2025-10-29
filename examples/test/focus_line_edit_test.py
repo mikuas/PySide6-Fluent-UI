@@ -1,42 +1,12 @@
 # coding:utf-8
 import sys
 
-from PySide6.QtGui import QPainter
+from PySide6.QtCore import QRectF
+from PySide6.QtGui import QPainter, QColor, Qt, QPen
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton
 
-from build.lib.PySide6FluentUI import setCustomStyleSheet
+from PySide6FluentUI import setCustomStyleSheet, LineEdit, isDarkTheme, FocusLineEdit
 from examples.window.splitWidget.demo import Interface
-
-
-class FocusLineEdit(QLineEdit):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.setStyleSheet(
-            """
-                FocusLineEdit {
-                    color: black;
-                    background-color: rgba(255, 255, 255, 0.7);
-                    border: none;
-                    border-radius: 5px;
-                    padding: 0px 10px;
-                    selection-background-color: --ThemeColorLight1;
-                }
-
-                FocusLineEdit:hover {
-                    background-color: rgba(249, 249, 249, 0.5);
-                }
-
-                FocusLineEdit:disabled{
-                    color: rgba(0, 0, 0, 92);
-                    background-color: rgba(249, 249, 249, 0.3);
-                }
-            """
-        )
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-
 
 
 class Window(Interface):
@@ -44,8 +14,11 @@ class Window(Interface):
         super().__init__(parent)
         self.viewLayout: QVBoxLayout = QVBoxLayout(self)
         self.focusLineEdit: FocusLineEdit = FocusLineEdit(self)
-
         self.button: QPushButton = QPushButton(self)
+
+        self.focusLineEdit.setCustomFocusedBorderColor("deeppink", "deepskyblue")
+
+        self.connectSignalSlot()
 
         self.viewLayout.addWidget(self.focusLineEdit)
         self.viewLayout.addWidget(self.button)

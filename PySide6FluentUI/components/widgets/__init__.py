@@ -15,7 +15,8 @@ from .check_box import CheckBox
 from .combo_box import ComboBox, EditableComboBox
 from .command_bar import CommandBar, CommandButton, CommandBarView
 from .line_edit import (
-    LineEdit, TextEdit, PlainTextEdit, LineEditButton, SearchLineEdit, PasswordLineEdit, TextBrowser, LabelLineEdit
+    LineEdit, TextEdit, PlainTextEdit, LineEditButton, SearchLineEdit, PasswordLineEdit, TextBrowser, LabelLineEdit,
+    FocusLineEdit
 )
 from .icon_widget import IconWidget
 from .label import (

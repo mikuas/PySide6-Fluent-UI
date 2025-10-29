@@ -55,3 +55,28 @@ TextBrowser:disabled {
 #lineEditButton:pressed {
     background-color: rgba(0, 0, 0, 6);
 }
+
+FocusLineEdit {
+    border: none;
+    outline: none;
+    border-bottom: none;
+    border-radius: 12px;
+}
+
+FocusLineEdit:hover {
+    border: none;
+    outline: none;
+    border-bottom: none;
+}
+
+FocusLineEdit:focus {
+    border: none;
+    outline: none;
+    border-bottom: none;
+}
+
+FocusLineEdit:disabled {
+    border: none;
+    outline: none;
+    border-bottom: none;
+}

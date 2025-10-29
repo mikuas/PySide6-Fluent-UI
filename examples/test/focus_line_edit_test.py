@@ -16,7 +16,7 @@ class Window(Interface):
         self.focusLineEdit: FocusLineEdit = FocusLineEdit(self)
         self.button: QPushButton = QPushButton(self)
 
-        self.focusLineEdit.setCustomFocusedBorderColor("deeppink", "deepskyblue")
+        # self.focusLineEdit.setCustomFocusedBorderColor("deeppink", "deepskyblue")
 
         self.connectSignalSlot()
 

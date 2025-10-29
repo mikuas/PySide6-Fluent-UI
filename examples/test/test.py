@@ -1,26 +1,14 @@
-# coding:utf-8
+from PySide6.QtWidgets import QApplication, QFileDialog, QVBoxLayout, QWidget
 
+app = QApplication([])
 
-def main():
-    while True:
-        try:
-            score: float = float(input("Enter your score: "))
-            if 100 < score < 0:
-                print("Null")
-            else:
-                print(score)
-        except ValueError:
-            print("请输入数字!!!")
-            continue
+w = QWidget()
+layout = QVBoxLayout(w)
+file_dialog = QFileDialog()
+file_dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
+file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+layout.addWidget(file_dialog)
 
-    return
-    while True:
-        try:
-            print(eval(input("Enter a Number:")), end="\n")
-        except Exception as e:
-            print(e, end="\n")
-        ...
-
-
-if __name__ == '__main__':
-    main()
+w.resize(600, 400)
+w.show()
+app.exec()

@@ -592,15 +592,29 @@ class LabelLineEdit(LineEdit):
 
 
 class FocusLineEdit(LineEdit):
+    focusOutSignal = Signal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.lightBorderColor: QColor = QColor(0, 0, 0, 32)
+        self.darkBorderColor: QColor = QColor(255, 255, 255, 32)
+
+    def setBorderColor(self, light: Union[str, QColor], dark: Union[str, QColor]) -> None:
+        self.lightBorderColor, self.darkBorderColor = light, dark
+        self.update()
+
+    def borderColor(self) -> QColor:
+        return autoFallbackThemeColor(self.lightBorderColor, self.darkBorderColor)
+
+    def focusOutEvent(self, e):
+        super().focusOutEvent(e)
+        self.focusOutSignal.emit()
 
     def paintEvent(self, e):
         QLineEdit.paintEvent(self, e)
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        c = 255 if isDarkTheme() else 0
-        pen = QPen(self.focusedBorderColor() if self.hasFocus() else QColor(c, c, c, 32))
+        pen = QPen(self.focusedBorderColor() if self.hasFocus() else self.borderColor())
         pen.setWidth(2)
         painter.setPen(pen)
         painter.setBrush(Qt.NoBrush)

@@ -18,8 +18,8 @@ class ImageWidget(QWidget):
         self.sizeLabel.setFontSize(16)
         self.tl, self.tr, self.br, self.bl = 0, 0, 0, 0
 
-        self.viewLayout.addWidget(self.sizeLabel, 1, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignLeft)
-        self.viewLayout.addWidget(self.closeButton, 1, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignRight)
+        self.viewLayout.addWidget(self.sizeLabel, 1, Qt.AlignTop | Qt.AlignHCenter)
+        self.viewLayout.addWidget(self.closeButton, 0, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignRight)
 
     def updateImage(self, path: str):
         self.pixmap = QPixmap(path)

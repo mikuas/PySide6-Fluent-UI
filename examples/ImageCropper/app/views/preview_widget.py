@@ -3,7 +3,8 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout
 from PySide6.QtGui import QPixmap, QPainter, QPainterPath
 from PySide6.QtCore import Qt
 
-from PySide6FluentUI import FlyoutDialog, SubtitleLabel, TransparentToolButton, FluentIcon
+from PySide6FluentUI import FlyoutDialog, SubtitleLabel, TransparentToolButton, FluentIcon, setToolTipInfo, \
+    ToolTipPosition
 
 
 class ImageWidget(QWidget):
@@ -21,13 +22,20 @@ class ImageWidget(QWidget):
         self.viewLayout.addWidget(self.sizeLabel, 1, Qt.AlignTop | Qt.AlignHCenter)
         self.viewLayout.addWidget(self.closeButton, 0, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignRight)
 
+        setToolTipInfo(self.closeButton, "关闭", 2500, ToolTipPosition.TOP)
+
     def updateImage(self, path: str):
         self.pixmap = QPixmap(path)
         size = self.pixmap.size()
         w, h = size.width(), size.height()
         self.sizeLabel.setText(f"大小: {w}x{h}")
 
-        scaled = (800, 520) if w - h > 128 else (600, 600)
+        if w - h > 128:
+            scaled = (800, 520)
+        elif h - w > 128:
+            scaled = (480, 720)
+        else:
+            scaled = (600, 600)
         self.pixmap.scaled(*scaled, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.parent().setFixedSize(*scaled)
         self.update()
@@ -60,9 +68,7 @@ class PreviewWidget(FlyoutDialog):
     def __init__(self, target, parent=None):
         super().__init__(target, parent=parent)
         self.viewLayout.setContentsMargins(3, 3, 3, 3)
-        self.parent = parent
-
         self.imageWidget: ImageWidget = ImageWidget(self)
-        self.viewLayout.addWidget(self.imageWidget, 1)
 
+        self.viewLayout.addWidget(self.imageWidget, 1)
         self.imageWidget.closeButton.clicked.connect(self.hide)

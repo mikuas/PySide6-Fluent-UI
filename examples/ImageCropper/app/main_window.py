@@ -3,7 +3,7 @@ import sys
 import subprocess
 import os.path
 
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QHBoxLayout, QFileDialog
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QHBoxLayout, QFileDialog, QListWidgetItem
 from PySide6.QtGui import QImageReader
 from PySide6.QtCore import Qt
 
@@ -20,18 +20,18 @@ from .common.config import cfg
 class MainWindow(SplitWidget):
     def __init__(self):
         super().__init__()
-        self.resize(800, 520)
+        self.setMinimumSize(800, 520)
         self.viewLayout: QVBoxLayout = QVBoxLayout(self)
         self.viewLayout.setContentsMargins(11, 38, 11, 11)
-        self.image: str = ""
+        self.imagePath: str = ""
         self.saveDir: str = cfg.saveDir.value
         self.imageTypes: list[str] = [f.data().decode() for f in QImageReader.supportedImageFormats()]
 
-        print(self.imageTypes)
-
-        self.fileFilter: str = "所有文件 (*.*);; "
+        print(f"{self.imageTypes = }")
+        self.fileFilter: str = "图像文件 ("
         for f in self.imageTypes:
-            self.fileFilter += f" {f}文件 (*.{f});;"
+            self.fileFilter += f"*.{f} "
+        self.fileFilter += ");; 所有文件(*.*)"
 
         self.titleLabel: SubtitleLabel = SubtitleLabel("圆角图片裁剪工具", self)
         self.memorySavePathSwitchButton: SwitchButton = SwitchButton(self)
@@ -43,15 +43,11 @@ class MainWindow(SplitWidget):
         )
         self.fileWidget.setLabelText("拖动图像文件到此")
 
-        self.optionButton: PushButton = PushButton("设置圆角弧度", self)
+        self.optionButton: PushButton = PushButton("设置", self)
         self.previewButton: PushButton = PushButton("预览", self)
         self.saveButton: PrimaryPushButton = PrimaryPushButton("保存", self)
-        self.optionView: OptionView = OptionView(self.optionButton, self)
-        self.saveTypeComboBox: ComboBox = ComboBox(self)
+        self.optionView: OptionView = OptionView(self)
         self.previewWidget: PreviewWidget = PreviewWidget(self.previewButton, self)
-
-        self.saveTypes: list[str] = ["png", "webp"]
-        self.saveTypeComboBox.addItems(["png(体积大)", "webp(体积小)"])
 
         titleLayout = QHBoxLayout()
         self.viewLayout.addLayout(titleLayout)
@@ -67,7 +63,6 @@ class MainWindow(SplitWidget):
         self.viewLayout.addLayout(buttonLayout)
         buttonLayout.addWidget(self.optionButton)
         buttonLayout.addWidget(self.previewButton)
-        buttonLayout.addWidget(self.saveTypeComboBox)
         buttonLayout.addWidget(self.saveButton)
 
         self.toggleThemeButton: TransparentToolButton = TransparentToolButton(FluentIcon.CONSTRACT, self)
@@ -80,29 +75,30 @@ class MainWindow(SplitWidget):
     def getSuffixName(self, file: str):
         return file.split(".")[-1]
 
-    def _updateImage(self, path):
-        if path:
-            path = path[0]
-            if self.getSuffixName(path) in self.imageTypes:
-                self.image = path
-                self.previewWidget.imageWidget.updateImage(path)
-                self.fileWidget.setDefaultDir(os.path.dirname(path))
-            else:
-                InfoBar.error(
-                    f"错误, 请选择图片类型文件: {self.imageTypes}",
-                    "",
-                    duration=3000,
-                    position=InfoBarPosition.TOP,
-                    parent=self
-                )
+    def _updateImage(self, paths):
+        if paths:
+            files = []
+            self.optionView.roundListWidget.clear()
+            for path in paths:
+                if self.getSuffixName(path) in self.imageTypes:
+                    files.append(path)
+                    item = QListWidgetItem(path.split("/")[-1])
+                    item.setData(Qt.ItemDataRole.UserRole, path)
+                    self.optionView.roundListWidget.addItem(item)
+            path = files[0]
+            dir = os.path.dirname(path)
+            self.imagePath = path
+            self.optionView.imageListLabel.setText(f"图片列表 目录: {dir}")
+            self.previewWidget.imageWidget.updateImage(path)
+            self.fileWidget.setDefaultDir(dir)
 
     def _updateRadius(self):
-        self.previewWidget.imageWidget.updateRadius(*self.optionView.getRadius())
+        self.previewWidget.imageWidget.updateRadius(*self.optionView.radiusView.getRadius())
 
     def _onAppliButtonClicked(self):
         self._updateRadius()
         InfoBar.success(
-            f"设置圆角成功! 值(左上, 右上, 右下, 左下): {self.optionView.getRadius()}",
+            f"设置圆角成功! 值(左上, 右上, 右下, 左下): {self.optionView.radiusView.getRadius()}",
             "",
             duration=3000,
             position=InfoBarPosition.TOP,
@@ -110,7 +106,7 @@ class MainWindow(SplitWidget):
         )
 
     def _onSaveButtonClicked(self):
-        if not self.image:
+        if not self.imagePath:
             InfoBar.error(
                 "图片保存失败,未选择图片文件!",
                 "",
@@ -120,50 +116,84 @@ class MainWindow(SplitWidget):
                 parent=self
             )
             return
-        filePath = os.path.dirname(self.image)
         if self.memorySavePathSwitchButton.isChecked():
             self.save(self.saveDir)
         else:
-            saveDir = QFileDialog.getExistingDirectory(self, "选择保存文件夹", self.saveDir or filePath) + "/"
+            saveDir = QFileDialog.getExistingDirectory(self, "选择保存文件夹", self.saveDir or os.path.dirname(self.imagePath)) + "/"
             self.save(saveDir)
 
     def save(self, saveDir: str):
         openButton: TransparentToolButton = TransparentToolButton(FluentIcon.FOLDER, self)
         setToolTipInfo(openButton, "打开保存目录", 2500, ToolTipPosition.TOP)
-        suffix = self.saveTypes[self.saveTypeComboBox.currentIndex()]
-        fileName = self.image.split(".")[0].split("/")[-1]
+        suffix = self.optionView.saveTypes[self.optionView.saveTypeComboBox.currentIndex()]
+        tmp = self.imagePath.split("/")[-1].split(".")
+
+        print(f"Split = {tmp}")
+
+        if len(tmp) > 2:
+            fileName = ""
+            for _ in tmp[:-1]:
+                fileName = fileName + _ + "_"
+        else:
+            fileName = tmp[0]
+        print(f"{fileName = }")
+
         if saveDir and saveDir != "/":
             if not self.memorySavePathSwitchButton.isEnabled():
                 self.memorySavePathSwitchButton.setEnabled(True)
             self.saveDir = saveDir
             cfg.set(cfg.saveDir, saveDir)
-            InfoBar.success(
-                f"  保存成功! 文件路径: {saveDir}{fileName}_ClipResult.{suffix}  ",
-                "",
-                duration=-1,
-                position=InfoBarPosition.TOP,
-                parent=self
-            ).addWidget(openButton)
             openButton.clicked.connect(lambda: subprocess.run(['explorer', os.path.normpath(saveDir)]))
-            print(saveDir)
-            print(
-                customRoundPixmap(self.image, *self.optionView.getRadius()).toImage().save(
-                    f"{saveDir}{fileName}_ClipResult.{suffix}", suffix
+            print(f"{saveDir = }")
+            sr = os.path.join(saveDir, fileName)
+            result = customRoundPixmap(self.imagePath, *self.optionView.radiusView.getRadius()).toImage().save(f"{sr}_ClipResult.{suffix}", suffix)
+
+            if result:
+                InfoBar.success(
+                    f"  保存成功! 文件路径: {sr}_ClipResult.{suffix}  ",
+                    "",
+                    duration=-1,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                ).addWidget(openButton)
+                if self.optionView.roundListWidget.count() > 0:
+                    print(f"Count: {self.optionView.roundListWidget.count()}")
+                    self.optionView.roundListWidget.takeItem(0)
+                    print(f"TakeItemCount: {self.optionView.roundListWidget.count()}\n")
+                    nextItem = self.optionView.roundListWidget.item(0)
+                    if nextItem:
+                        self.imagePath = nextItem.data(Qt.ItemDataRole.UserRole)
+                        self.previewWidget.imageWidget.updateImage(self.imagePath)
+                    else:
+                        self.imagePath = ""
+                        self.previewWidget.imageWidget.updateImage("")
+            else:
+                InfoBar.error(
+                    "文件保存失败",
+                    "",
+                    duration=3500,
+                    position=InfoBarPosition.TOP,
+                    parent=self
                 )
-            )
+
+    def resizeEvent(self, e):
+        self.optionView.setFixedWidth(self.width() // 2)
+        self.optionView._adjustDrawer()
+        super().resizeEvent(e)
 
     def _onMemoryPathCheckedChanged(self, checked: bool):
         cfg.set(cfg.isMemorySavePath, checked)
 
     def connectSignalSlot(self):
-        self.optionButton.clicked.connect(self.optionView.show)
+        self.optionButton.clicked.connect(self.optionView.toggleDrawer)
         self.previewButton.clicked.connect(self.previewWidget.show)
         self.fileWidget.draggedChange.connect(self._updateImage)
         self.fileWidget.selectionChange.connect(self._updateImage)
-        self.optionView.applyButton.clicked.connect(self._onAppliButtonClicked)
+        self.optionView.radiusView.applyButton.clicked.connect(self._onAppliButtonClicked)
         self.toggleThemeButton.clicked.connect(toggleTheme)
         self.saveButton.clicked.connect(self._onSaveButtonClicked)
         self.memorySavePathSwitchButton.checkedChanged.connect(self._onMemoryPathCheckedChanged)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -6,10 +6,10 @@
             "PingFang SC"
         ],
         "ThemeColor": "#ff009faa",
-        "ThemeMode": "Auto"
+        "ThemeMode": "Light"
     },
     "Save": {
         "IsMemorySavePath": false,
-        "SaveDir": ""
+        "SaveDir": "E:/Pyside6_App/Temp"
     }
 }

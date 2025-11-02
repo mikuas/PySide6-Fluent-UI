@@ -1,4 +1,4 @@
 import os
 
 
-print(os.path.join("C:/RED", "blue.png"))
+print(os.path.join("C:/HelloWorld", "\\"))

@@ -7,13 +7,13 @@ from PySide6.QtWidgets import QApplication, QVBoxLayout, QHBoxLayout, QFileDialo
 from PySide6.QtGui import QImageReader
 from PySide6.QtCore import Qt
 
-from PySide6FluentUI import SplitWidget, DragFileWidget, SubtitleLabel, PushButton, PrimaryPushButton, \
-    TransparentToolButton, FluentIcon, setToolTipInfo, ToolTipPosition, toggleTheme, InfoBar, InfoBarPosition, ComboBox, \
-    SwitchButton
+from PySide6FluentUI import SplitWidget, DragFileWidget, SubtitleLabel, PushButton, PrimaryPushButton, FluentIcon, \
+    TransparentToolButton, setToolTipInfo, ToolTipPosition, toggleTheme, InfoBar, InfoBarPosition, SwitchButton
 
 from .views.option_view import OptionView
 from .views.preview_widget import PreviewWidget
 from .utils.round_radius_utils import customRoundPixmap
+from .utils.file_utils import getSuffixName
 from .common.config import cfg
 
 
@@ -72,25 +72,30 @@ class MainWindow(SplitWidget):
         setToolTipInfo(self.toggleThemeButton, "切换主题", 2500, ToolTipPosition.TOP)
         self.connectSignalSlot()
 
-    def getSuffixName(self, file: str):
-        return file.split(".")[-1]
+    def _updateSelectedImage(self, item: QListWidgetItem):
+        if item:
+            path = item.data(Qt.ItemDataRole.UserRole)
+            self.imagePath = path
+            self.previewWidget.imageWidget.updateImage(path)
 
     def _updateImage(self, paths):
         if paths:
             files = []
             self.optionView.roundListWidget.clear()
             for path in paths:
-                if self.getSuffixName(path) in self.imageTypes:
+                if getSuffixName(path) in self.imageTypes:
                     files.append(path)
                     item = QListWidgetItem(path.split("/")[-1])
                     item.setData(Qt.ItemDataRole.UserRole, path)
                     self.optionView.roundListWidget.addItem(item)
             path = files[0]
-            dir = os.path.dirname(path)
+            fileDir = os.path.dirname(path)
             self.imagePath = path
-            self.optionView.imageListLabel.setText(f"图片列表 目录: {dir}")
+            self.optionView.roundListWidget.setCurrentRow(0)
+            self.optionView.imageListLabel.setText(f"图片列表 目录: {fileDir}")
+            self.optionView.imageCountLabel.setText(f"图片数量: {len(files)}")
             self.previewWidget.imageWidget.updateImage(path)
-            self.fileWidget.setDefaultDir(dir)
+            self.fileWidget.setDefaultDir(fileDir)
 
     def _updateRadius(self):
         self.previewWidget.imageWidget.updateRadius(*self.optionView.radiusView.getRadius())
@@ -123,8 +128,6 @@ class MainWindow(SplitWidget):
             self.save(saveDir)
 
     def save(self, saveDir: str):
-        openButton: TransparentToolButton = TransparentToolButton(FluentIcon.FOLDER, self)
-        setToolTipInfo(openButton, "打开保存目录", 2500, ToolTipPosition.TOP)
         suffix = self.optionView.saveTypes[self.optionView.saveTypeComboBox.currentIndex()]
         tmp = self.imagePath.split("/")[-1].split(".")
 
@@ -143,14 +146,17 @@ class MainWindow(SplitWidget):
                 self.memorySavePathSwitchButton.setEnabled(True)
             self.saveDir = saveDir
             cfg.set(cfg.saveDir, saveDir)
-            openButton.clicked.connect(lambda: subprocess.run(['explorer', os.path.normpath(saveDir)]))
             print(f"{saveDir = }")
-            sr = os.path.join(saveDir, fileName)
-            result = customRoundPixmap(self.imagePath, *self.optionView.radiusView.getRadius()).toImage().save(f"{sr}_ClipResult.{suffix}", suffix)
+            src = os.path.join(saveDir, fileName)
+            result = customRoundPixmap(self.imagePath, *self.optionView.radiusView.getRadius()).toImage().save(f"{src}_ClipResult.{suffix}", suffix)
 
             if result:
+                openButton: TransparentToolButton = TransparentToolButton(FluentIcon.FOLDER)
+                setToolTipInfo(openButton, "打开保存目录", 2500, ToolTipPosition.TOP)
+                openButton.clicked.connect(lambda: subprocess.run(['explorer', os.path.normpath(saveDir)]))
+
                 InfoBar.success(
-                    f"  保存成功! 文件路径: {sr}_ClipResult.{suffix}  ",
+                    f"  保存成功! 文件路径: {src}_ClipResult.{suffix}  ",
                     "",
                     duration=-1,
                     position=InfoBarPosition.TOP,
@@ -158,9 +164,11 @@ class MainWindow(SplitWidget):
                 ).addWidget(openButton)
                 if self.optionView.roundListWidget.count() > 0:
                     print(f"Count: {self.optionView.roundListWidget.count()}")
-                    self.optionView.roundListWidget.takeItem(0)
+                    print(f"Current Row: {self.optionView.roundListWidget.currentRow()}")
+                    self.optionView.roundListWidget.takeItem(self.optionView.roundListWidget.currentRow())
                     print(f"TakeItemCount: {self.optionView.roundListWidget.count()}\n")
                     nextItem = self.optionView.roundListWidget.item(0)
+                    self.optionView.roundListWidget.setCurrentRow(0)
                     if nextItem:
                         self.imagePath = nextItem.data(Qt.ItemDataRole.UserRole)
                         self.previewWidget.imageWidget.updateImage(self.imagePath)
@@ -184,12 +192,34 @@ class MainWindow(SplitWidget):
     def _onMemoryPathCheckedChanged(self, checked: bool):
         cfg.set(cfg.isMemorySavePath, checked)
 
+    def _moveSelection(self, offset: int):
+        currentRow = self.optionView.roundListWidget.currentRow()
+        newRow = currentRow + offset
+        count = self.optionView.roundListWidget.count()
+
+        if 0 <= currentRow < count:
+            self.optionView.roundListWidget.setCurrentRow(newRow)
+            return False
+        return True
+
+    def _onPreviousButtonClicked(self):
+        self._moveSelection(-1)
+
+    def _onNextButtonClicked(self):
+        self._moveSelection(1)
+
     def connectSignalSlot(self):
         self.optionButton.clicked.connect(self.optionView.toggleDrawer)
         self.previewButton.clicked.connect(self.previewWidget.show)
         self.fileWidget.draggedChange.connect(self._updateImage)
         self.fileWidget.selectionChange.connect(self._updateImage)
+
         self.optionView.radiusView.applyButton.clicked.connect(self._onAppliButtonClicked)
+        self.optionView.roundListWidget.currentItemChanged.connect(self._updateSelectedImage)
+
+        self.previewWidget.imageWidget.previousButton.clicked.connect(self._onPreviousButtonClicked)
+        self.previewWidget.imageWidget.nextButton.clicked.connect(self._onNextButtonClicked)
+
         self.toggleThemeButton.clicked.connect(toggleTheme)
         self.saveButton.clicked.connect(self._onSaveButtonClicked)
         self.memorySavePathSwitchButton.checkedChanged.connect(self._onMemoryPathCheckedChanged)

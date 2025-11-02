@@ -1,9 +1,9 @@
 # coding:utf-8
-from PySide6.QtWidgets import QWidget, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 from PySide6.QtGui import QPixmap, QPainter, QPainterPath
 from PySide6.QtCore import Qt
 
-from PySide6FluentUI import FlyoutDialog, SubtitleLabel, TransparentToolButton, FluentIcon, setToolTipInfo, \
+from PySide6FluentUI import FlyoutDialog, SubtitleLabel, TransparentToolButton, FluentIcon, setToolTipInfos, \
     ToolTipPosition
 
 
@@ -12,30 +12,40 @@ class ImageWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumWidth(256)
-        self.viewLayout: QHBoxLayout = QHBoxLayout(self)
+        self.viewLayout: QVBoxLayout = QVBoxLayout(self)
         self.pixmap: QPixmap = QPixmap()
-        self.sizeLabel: SubtitleLabel = SubtitleLabel("大小: 未知", self)
+        self.imageInfoLabel: SubtitleLabel = SubtitleLabel("图片: None 大小: None", self)
         self.closeButton: TransparentToolButton = TransparentToolButton(FluentIcon.CLOSE, self)
-        self.sizeLabel.setFontSize(16)
+        self.imageInfoLabel.setFontSize(16)
         self.tl, self.tr, self.br, self.bl = 0, 0, 0, 0
 
-        self.viewLayout.addWidget(self.sizeLabel, 1, Qt.AlignTop | Qt.AlignHCenter)
-        self.viewLayout.addWidget(self.closeButton, 0, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignRight)
+        self.previousButton: TransparentToolButton = TransparentToolButton(FluentIcon.CARE_LEFT_SOLID, self)
+        self.nextButton: TransparentToolButton = TransparentToolButton(FluentIcon.CARE_RIGHT_SOLID, self)
 
-        setToolTipInfo(self.closeButton, "关闭", 2500, ToolTipPosition.TOP)
+        titleLayout = QHBoxLayout()
+        titleLayout.addWidget(self.imageInfoLabel, 1, Qt.AlignTop | Qt.AlignHCenter)
+        titleLayout.addWidget(self.closeButton, 0, Qt.AlignTop | Qt.AlignHCenter | Qt.AlignRight)
+        self.viewLayout.addLayout(titleLayout)
+
+        self.previousButton.setVisible(False)
+        self.previousButton.setFixedSize(35, 35)
+        self.nextButton.setVisible(False)
+        self.nextButton.setFixedSize(35, 35)
+
+        setToolTipInfos([self.closeButton, self.previousButton, self.nextButton], ["关闭", "上一张", "下一张"], 2500, ToolTipPosition.TOP)
 
     def updateImage(self, path: str):
         self.pixmap = QPixmap(path)
         size = self.pixmap.size()
         w, h = size.width(), size.height()
-        self.sizeLabel.setText(f"大小: {w}x{h}")
+        self.imageInfoLabel.setText(f"图片: {path.split("/")[-1]} 大小: {w}x{h}")
 
         if w - h > 128:
-            scaled = (800, 520)
+            scaled = (860, 600)
         elif h - w > 128:
-            scaled = (480, 720)
+            scaled = (495, 800)
         else:
-            scaled = (600, 600)
+            scaled = (650, 650)
         self.pixmap.scaled(*scaled, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.parent().setFixedSize(*scaled)
         self.update()
@@ -48,7 +58,7 @@ class ImageWidget(QWidget):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
 
-        rect = self.rect().adjusted(12, 48, -12, -12)
+        rect = self.rect().adjusted(12, self.imageInfoLabel.height() + 24, -12, -48)
         path = QPainterPath()
         path.moveTo(rect.left() + self.tl, rect.top())
         path.lineTo(rect.right() - self.tr, rect.top())
@@ -62,6 +72,22 @@ class ImageWidget(QWidget):
 
         painter.setClipPath(path)
         painter.drawPixmap(rect, self.pixmap)
+
+    def enterEvent(self, event):
+        self.previousButton.setVisible(True)
+        self.nextButton.setVisible(True)
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self.previousButton.setVisible(False)
+        self.nextButton.setVisible(False)
+        super().leaveEvent(event)
+
+    def resizeEvent(self, event):
+        w, h = self.width(), self.height()
+        self.previousButton.move(12, (h - 35) // 2)
+        self.nextButton.move(w - 35 - 12, (h - 35) // 2)
+        super().resizeEvent(event)
 
 
 class PreviewWidget(FlyoutDialog):

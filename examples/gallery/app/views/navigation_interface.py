@@ -1,5 +1,8 @@
 # coding:utf-8
-from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout
+
+from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge, SubtitleLabel
 
 from ..widgets.basic_interface import Interface
 
@@ -9,6 +12,10 @@ class NavigationInterface(Interface):
         super().__init__("导航", "PySide6FluentUI.components.widgets", parent)
         self.setObjectName("NavigationInterface")
         self.vBoxLayout.addWidget(self.scrollArea)
+
+        widget = QWidget()
+        widget.setMinimumHeight(328)
+        layout = QVBoxLayout(widget)
 
         self.slidingNavigation: SlidingNavigationBar = SlidingNavigationBar(self)
         self.slidingNavigation.addItem("zy", "主页", FluentIcon.HOME, isSelected=True)
@@ -21,11 +28,16 @@ class NavigationInterface(Interface):
         self.slidingNavigation.addStretch(1)
         self.slidingNavigation.addItem("sz", "", FluentIcon.SETTING)
 
+        self.interfaceLabel: SubtitleLabel = SubtitleLabel("主页", self)
+        layout.addWidget(self.slidingNavigation)
+        layout.addWidget(self.interfaceLabel, 1, Qt.AlignCenter)
+
         InfoBadge.attension(9, parent=self.slidingNavigation, target=self.slidingNavigation.item("xz"))
+        self.slidingNavigation.currentItemChanged.connect(lambda item: self.interfaceLabel.setText(item.text()))
 
         view = self.addExamplesCard(
             "滑动顶部导航栏",
-            self.slidingNavigation,
+            widget,
             1
         ).widget.widgetCard.viewLayout
         view.setSpacing(0)

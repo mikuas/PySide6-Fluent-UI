@@ -7,7 +7,7 @@ from .style_sheet import (
     setStyleSheet, getStyleSheet, setTheme, ThemeColor, themeColor, setThemeColor, applyThemeColor, FluentStyleSheet,
     StyleSheetBase, StyleSheetFile, StyleSheetCompose, CustomStyleSheet, toggleTheme, setCustomStyleSheet
 )
-from .draw_round_rect import drawRoundRect
+from .draw_round_rect import drawRoundRect, addRoundPath
 from .smooth_scroll import SmoothScroll, SmoothMode
 from .translator import FluentTranslator
 from .router import qrouter, Router

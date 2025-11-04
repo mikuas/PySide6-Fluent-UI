@@ -3,7 +3,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-import resources.app_resources
+import resources.gallery_resources
 from app.main_window import MainWindow
 
 

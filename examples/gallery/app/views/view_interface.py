@@ -2,7 +2,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget, QHBoxLayout
 
-from PySide6FluentUI import RoundListWidget, StrongBodyLabel, Pager, DragFileWidget, DragFolderWidget, ToastInfoBar
+from PySide6FluentUI import RoundListWidget, StrongBodyLabel, Pager, DragFileWidget, DragFolderWidget, ToastInfoBar, \
+    TransparentToolButton, FluentIcon, setToolTipInfo
 
 from ..widgets.basic_interface import Interface
 
@@ -31,12 +32,16 @@ class ViewInterface(Interface):
         layout.setContentsMargins(0, 0, 0, 0)
         self.pageLabel: StrongBodyLabel = StrongBodyLabel("第 1 页", self)
         self.pager: Pager = Pager(1000, 6, self)
+        self.addPageButton: TransparentToolButton = TransparentToolButton(FluentIcon.ADD, self)
 
         self.pager.setCurrentPage(1)
         self.pager.currentPageChanged.connect(lambda page: self.pageLabel.setText(f"第 {page} 页"))
+        self.addPageButton.clicked.connect(lambda: self.pager.setPages(self.pager.pages() + 1))
+        setToolTipInfo(self.addPageButton, "添加页面", 2500)
 
-        layout.addWidget(self.pager, 0, Qt.AlignLeft | Qt.AlignVCenter)
-        layout.addWidget(self.pageLabel, 1, Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(self.pager, 1, Qt.AlignLeft | Qt.AlignVCenter)
+        layout.addWidget(self.addPageButton, 0, Qt.AlignRight | Qt.AlignVCenter)
+        layout.addWidget(self.pageLabel, 0, Qt.AlignRight | Qt.AlignVCenter)
 
         self.addExamplesCard(
             "分页组件",

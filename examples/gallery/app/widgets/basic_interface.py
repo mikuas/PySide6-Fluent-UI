@@ -7,6 +7,7 @@ from PySide6FluentUI import TitleLabel, SubtitleLabel, CaptionLabel, PushButton,
     setFont, BodyLabel, IconWidget
 
 from ..common.config import update
+from ..utils.url_utils import openUrl
 
 
 class WidgetCard(QWidget):
@@ -202,6 +203,7 @@ class Interface(QWidget):
         self.scrollArea.setWidget(self._widget)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.enableTransparentBackground()
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scrollArea.setContentsMargins(0, 0, 0, 0)
 
         self._widget.setContentsMargins(0, 0, 0, 0)
@@ -218,15 +220,11 @@ class Interface(QWidget):
         self.scrollLayout.addWidget(card)
         return card
 
-    @staticmethod
-    def openUrl(url: str) -> bool:
-        return QDesktopServices.openUrl(url)
-
     def _openDocumentPage(self):
-        self.openUrl("https://github.com/mikuass/PythonModule.git")
+        openUrl("https://github.com/mikuas/PySide6-Fluent-UI")
 
     def _openSourceCodePage(self):
-        self.openUrl("https://github.com/mikuass/PythonModule.git")
+        openUrl("https://github.com/mikuas/PySide6-Fluent-UI.git")
 
     def _onToggleButton(self):
         toggleTheme(True)

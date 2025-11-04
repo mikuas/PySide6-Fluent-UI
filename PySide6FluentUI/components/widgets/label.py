@@ -140,8 +140,8 @@ class FluentLabelBase(QLabel):
         menu = LabelContextMenu(parent=self)
         menu.exec(self.mapToGlobal(pos))
 
-    def setFontSize(self, size: int):
-        self.setFont(getFont(size))
+    def setFontSize(self, size: int, weight=QFont.Normal):
+        self.setFont(getFont(size, weight))
 
 
 class CaptionLabel(FluentLabelBase):

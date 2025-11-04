@@ -106,3 +106,7 @@ QSlider::handle:vertical:disabled {
     background-color: #808080;
     border: 5px solid #cccccc;
 }
+
+#valueLabel {
+    color: black;
+}

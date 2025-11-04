@@ -20,7 +20,7 @@ class PageButton(QWidget):
         self._text = str(page)
         self._isSelected: bool = selected
         self._isHover: bool = False
-        self.setFixedSize(32, 32)
+        self.setFixedSize(35, 35)
 
     def setSelected(self, isSelected: bool) -> None:
         if self._isSelected == isSelected:

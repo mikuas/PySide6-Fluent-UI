@@ -1,7 +1,7 @@
 {
     "MainWindow": {
-        "AcrylicEnabled": false,
-        "MicaEnabled": false
+        "AcrylicEnabled": true,
+        "MicaEnabled": true
     },
     "QFluentWidgets": {
         "FontFamilies": [
@@ -9,7 +9,7 @@
             "Microsoft YaHei",
             "PingFang SC"
         ],
-        "ThemeColor": "#ff4d94ff",
+        "ThemeColor": "#ff3698d7",
         "ThemeMode": "Dark"
     }
 }

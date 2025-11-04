@@ -10,6 +10,7 @@ from .views.home_interface import HomeInterface
 from .views.icon_interface import IconInterface
 from .views.basic_input_interface import BasicInputInterface
 from .views.dialog_interface import DialogInterface
+from .views.layout_interface import LayoutInterface
 from .views.navigation_interface import NavigationInterface
 from .views.status_interface import StatusInterface
 from .views.view_interface import ViewInterface
@@ -19,7 +20,6 @@ from .views.setting_interface import SettingInterface
 class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("gallery")
         self.setWindowIcon(QIcon(":/gallery/icons/app.ico"))
 
@@ -30,6 +30,7 @@ class MainWindow(FluentWindow):
         self.iconInterface: IconInterface = IconInterface(self)
         self.basicInputInterface: BasicInputInterface = BasicInputInterface(self)
         self.dialogInterface: DialogInterface = DialogInterface(self)
+        self.layoutInterface: LayoutInterface = LayoutInterface(self)
         self.navigationInterface_: NavigationInterface = NavigationInterface(self)
         self.statusInterface: StatusInterface = StatusInterface(self)
         self.viewInterface: ViewInterface = ViewInterface(self)
@@ -64,6 +65,12 @@ class MainWindow(FluentWindow):
             NavigationItemPosition.SCROLL
         )
         self.addSubInterface(
+            self.layoutInterface,
+            FluentIcon.LAYOUT,
+            "布局",
+            NavigationItemPosition.SCROLL
+        )
+        self.addSubInterface(
             self.navigationInterface_,
             FluentIcon.MENU,
             "导航",
@@ -89,8 +96,7 @@ class MainWindow(FluentWindow):
             NavigationItemPosition.BOTTOM
         )
 
-    def showEvent(self, event):
-        super().showEvent(event)
+    def show(self):
         screen = QApplication.primaryScreen()
         pr = screen.devicePixelRatio()
         size = screen.size()
@@ -98,6 +104,7 @@ class MainWindow(FluentWindow):
         self.resize(w * pr // 2.5, h * pr // 2.5)
 
         self.move((w - self.width()) // 2, (h - self.height()) // 2)
+        super().show()
 
 
 if __name__ == '__main__':

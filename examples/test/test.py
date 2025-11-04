@@ -1,4 +1,9 @@
 import os
 
 
-print(os.path.join("C:/HelloWorld", "\\"))
+s: int = 0
+
+for i in range(1, 20, 2):
+    s += i
+
+print(f"{s = }")

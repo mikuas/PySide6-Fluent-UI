@@ -5,6 +5,7 @@ from PySide6.QtCore import Qt, QSize, QRectF
 from PySide6.QtGui import QPainter, QColor
 
 from ...common.style_sheet import isDarkTheme
+from ...common.draw_round_rect import addRoundPath
 
 
 class SplitterHandle(QSplitterHandle):
@@ -42,7 +43,7 @@ class SplitterHandle(QSplitterHandle):
         painter.setBrush(QColor(pc, pc, pc))
         painter.setPen(Qt.NoPen)
         if self.isHover:
-            painter.fillRect(self.rect(), QColor(fc, fc, fc))
+            painter.fillPath(addRoundPath(self.rect(), 7, 7, 7, 7), QColor(fc, fc, fc))
         if self.orientation() == Qt.Orientation.Horizontal:
             h = rect.height() // 2 - 16
             painter.drawRoundedRect(rect.adjusted(4.2, h, -4.2, -h), 4, 4)

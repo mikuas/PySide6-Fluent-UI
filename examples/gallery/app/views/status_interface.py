@@ -1,10 +1,12 @@
 # coding:utf-8
-from PySide6.QtCore import Qt
+import time
+
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 
 from PySide6FluentUI import FillPushButton, ToastInfoBar, ToastInfoBarColor, ToastInfoBarPosition, themeColor, \
-    MessageBoxBase, TransparentToolButton, FluentIcon, setToolTipInfo, ToolTipPosition, CaptionLabel, LineEdit, \
-    ComboBox, ColorPickerButton
+    MessageBoxBase, TransparentToolButton, FluentIcon, setToolTipInfo, ToolTipPosition, CaptionLabel, \
+    ComboBox, ColorPickerButton, FocusLineEdit, ProgressBar, PushButton, BodyLabel, SpinBox
 
 from ..widgets.basic_interface import Interface
 from ..widgets.test_progress_toast import ProgressToast
@@ -29,11 +31,11 @@ class TextDialog(MessageBoxBase):
         self.viewLayout.addLayout(self.textLayout)
         self.viewLayout.addLayout(self.comboBoxLayout)
 
-        self.titleEdit: LineEdit = LineEdit(self)
+        self.titleEdit: FocusLineEdit = FocusLineEdit(self)
         self.textLayout.addWidget(CaptionLabel("设置消息条标题", self))
         self.textLayout.addWidget(self.titleEdit)
 
-        self.connectEdit: LineEdit = LineEdit(self)
+        self.connectEdit: FocusLineEdit = FocusLineEdit(self)
         self.textLayout.addWidget(CaptionLabel("设置消息条内容", self))
         self.textLayout.addWidget(self.connectEdit)
 
@@ -115,8 +117,60 @@ class StatusInterface(Interface):
             self.progressButton,
         )
 
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+
+        self.progress: ProgressBar = ProgressBar(self)
+        self.startProgressButton: PushButton = PushButton("启动", self)
+        self.currentValueLabel: BodyLabel = BodyLabel("当前值: 0", self)
+        self.changeCurrentValueSpinBox: SpinBox = SpinBox(self)
+        self.progressTimer = QTimer(self)
+
+        self.progressTimer.setInterval(250)
+        self.progress.setMinimumWidth(256)
+        self.progress.setRange(0, 100)
+        self.changeCurrentValueSpinBox.setRange(0, 100)
+        self.changeCurrentValueSpinBox.setMinimumWidth(128)
+
+        layout.setSpacing(18)
+        layout.addWidget(self.progress, 0, Qt.AlignLeft)
+        layout.addStretch(1)
+        layout.addWidget(self.currentValueLabel, 0, Qt.AlignLeft)
+        layout.addWidget(self.changeCurrentValueSpinBox, 0, Qt.AlignLeft)
+        layout.addWidget(self.startProgressButton, 0, Qt.AlignRight)
+
+        self.addExamplesCard(
+            "进度条",
+            widget,
+            1
+        )
+
         self.scrollLayout.addStretch(1)
         self.connectSignalSlot()
+
+    def _startProgress(self):
+        value = self.progress.value()
+        if value == self.progress.maximum():
+            return
+        value += 1
+        self.progress.setValue(value)
+        self.currentValueLabel.setText(f"当前值: {value}")
+        self.changeCurrentValueSpinBox.setValue(value)
+
+    def _changeCurrentValue(self, value: int):
+        if self.progressTimer.isActive():
+            return
+        self.progress.setValue(value)
+        self.currentValueLabel.setText(f"当前值: {value}")
+
+    def _toggleProgressButtonStatus(self):
+        if self.startProgressButton.text() == "启动":
+            text = "暂停"
+            self.progressTimer.start()
+        else:
+            self.progressTimer.stop()
+            text = "启动"
+        self.startProgressButton.setText(text)
 
     def connectSignalSlot(self):
         self.successToastButton.clicked.connect(
@@ -186,3 +240,7 @@ class StatusInterface(Interface):
                 parent=self
             )
         )
+
+        self.progressTimer.timeout.connect(self._startProgress)
+        self.changeCurrentValueSpinBox.valueChanged.connect(self._changeCurrentValue)
+        self.startProgressButton.clicked.connect(self._toggleProgressButtonStatus)

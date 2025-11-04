@@ -88,3 +88,7 @@ QSlider::handle:vertical:pressed {
             stop:0.5 rgb(69, 69, 69),
             stop:1 rgb(69, 69, 69));
 }
+
+#valueLabel {
+    color: white;
+}

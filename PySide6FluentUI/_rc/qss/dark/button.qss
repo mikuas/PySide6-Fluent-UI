@@ -12,11 +12,11 @@ PushButton, ToolButton, ToggleButton, ToggleToolButton {
 RoundPushButton {
     background: rgba(255, 255, 255, 0.0605);
     color: white;
-    padding: 5px 12px 6px 12px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    padding: 5px 12px 6px 16px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
     padding: 5px 12px 6px 12px;
     outline: none;
 }
@@ -26,10 +26,10 @@ ToolButton {
 }
 
 RoundToolButton {
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 PushButton[isPlaceholderText=true] {
@@ -347,6 +347,10 @@ FillPushButton, FillToolButton {
     border-top-right-radius: 6px;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
+}
+
+OutlinePushButton[isCustomTextColor="true"] {
+    color: palette(ButtonText);
 }
 
 FillPushButton:hover, FillToolButton:hover {

@@ -3,7 +3,8 @@ import re
 from typing import Union, Tuple
 
 from PySide6.QtCore import Signal, QUrl, Qt, QRectF, QSize, QPoint, Property, QRect
-from PySide6.QtGui import QDesktopServices, QIcon, QPainter, QColor, QPainterPath, QFontMetrics, QPen, QMouseEvent
+from PySide6.QtGui import QDesktopServices, QIcon, QPainter, QColor, QPainterPath, QFontMetrics, QPen, QMouseEvent, \
+    QPalette
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QRadioButton, QToolButton, QApplication, QWidget, QSizePolicy
 
 from ...common.animation import TranslateYAnimation
@@ -1119,7 +1120,7 @@ class RoundButtonBase: # New
 
     def _postInit(self):
         super()._postInit()
-        self.tl, self.tr, self.bl, self.br = 12, 12, 12, 12
+        self.tl, self.tr, self.bl, self.br = 16, 16, 16, 16
         qconfig.themeChangedFinished.connect(self.__updateRadius)
 
     def __updateRadius(self):
@@ -1247,18 +1248,36 @@ class FillToolButton(FillButtonBase, ToolButton): # New
 
 class OutlineButtonBase: # New
 
-    checkedChange: Signal = Signal(bool)
-
-    def mouseReleaseEvent(self, event):
-        super().mouseReleaseEvent(event)
-        self.checkedChange.emit(self.isChecked())
-
     def _postInit(self):
         super()._postInit()
         self.setCheckable(True)
+        self.setProperty("isCustomTextColor", True)
         self.__outlineColor: QColor = None
+        self.__palette: QPalette = self.palette()
 
-    def setOutlineColor(self, color: str | QColor) -> None:
+        self.toggled.connect(self._updateIconColor)
+        qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
+
+        self._updateButtonTextPalette(self.noCheckedOutlineColor())
+
+    def _onThemeChangedFinished(self):
+        self._updateIconColor(self.isChecked())
+
+    def _updateIconColor(self, isChecked: bool):
+        color = self.outlineColor() if isChecked else self.noCheckedOutlineColor()
+        if isinstance(self._icon, FluentIconBase):
+            self.setIcon(self._icon.colored(color, color))
+
+        self._updateButtonTextPalette(color)
+
+    def noCheckedOutlineColor(self) -> QColor:
+        return autoFallbackThemeColor(QColor(0, 0, 0), QColor(255, 255, 255))
+
+    def _updateButtonTextPalette(self, color: Union[str, QColor]):
+        self.__palette.setColor(QPalette.ColorRole.ButtonText, color)
+        self.setPalette(self.__palette)
+
+    def setOutlineColor(self, color: Union[str, QColor]) -> None:
         if isinstance(color, str):
             color = QColor(color)
         if color == self.__outlineColor:
@@ -1266,15 +1285,18 @@ class OutlineButtonBase: # New
         self.__outlineColor = color
         self.update()
 
+    def outlineColor(self) -> QColor:
+        return self.__outlineColor or themeColor()
+
     def _drawBorder(self):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         color = 255 if isDarkTheme() else 0
-        color = (self.__outlineColor or themeColor()) if self.isChecked() else QColor(color, color, color, 24)
+        color = self.outlineColor() if self.isChecked() else QColor(color, color, color, 18)
         pen = QPen(color)
         pen.setWidthF(1.5)
         painter.setPen(pen)
-        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.8, 0.8, -0.8, -0.8), *self.radius())
+        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.5, 0.7, -0.5, -0.5), *self.radius())
 
 
 class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
@@ -1286,7 +1308,7 @@ class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
     * OutlinePushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
     * OutlinePushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
     """
-    
+
 
 class OutlineToolButton(OutlineButtonBase, RoundToolButton): # New
     """ Outline ToolButton

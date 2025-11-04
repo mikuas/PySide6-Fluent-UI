@@ -71,6 +71,9 @@ class SlidingWidget(QWidget):
     def icon(self) -> QIcon:
         return toQIcon(self._icon)
 
+    def text(self) -> str:
+        return self._text
+
     def setIconSize(self, size: int) -> None:
         if self._iconSize == size:
             return

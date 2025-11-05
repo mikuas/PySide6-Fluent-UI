@@ -1,0 +1,38 @@
+AnimatedMenu {
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+AnimatedMenu::item {
+    padding: 6px 20px;
+    border-radius: 4px;
+    color: #000000;
+}
+
+AnimatedMenu::item:selected {
+    background-color: #EDEDED;
+}
+
+QMenuBar {
+    background-color: #F9F9F9;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font: 14px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
+}
+
+QMenuBar[isTransparent=true] {
+    background-color: transparent;
+}
+
+QMenuBar::item {
+    padding: 6px 14px;
+    margin: 2px;
+    border-radius: 6px;
+    color: #000000;
+}
+
+QMenuBar::item:selected {
+    background-color: #F0F0F0;
+}

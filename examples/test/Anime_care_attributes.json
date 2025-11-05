@@ -1,0 +1,16 @@
+{
+  "Anime_img_str_list": [
+    {
+      "img": "C:\\Users\\Administrator\\OneDrive\\Pictures\\Pingros\\0.jpg",
+      "str_1": "千寻",
+      "str_2": "来自《千与千寻》",
+      "anime_url": "https://example.com/spiritedaway"
+    },
+    {
+      "img": "C:\\Users\\Administrator\\OneDrive\\Pictures\\Pingros\\1.jpg",
+      "str_1": "鸣人",
+      "str_2": "来自《火影忍者》",
+      "anime_url": "https://example.com/naruto"
+    }
+  ]
+}

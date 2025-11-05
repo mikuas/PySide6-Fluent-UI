@@ -29,7 +29,7 @@ from .menu import (
     MenuItemDelegate, ShortcutMenuItemDelegate, CheckableMenu, MenuIndicatorType, SystemTrayMenu,
     CheckableSystemTrayMenu
 )
-from .menu_bar import MenuBar
+from .menu_bar import MenuBar, AnimatedMenu
 from .info_badge import InfoBadge, InfoLevel, DotInfoBadge, IconInfoBadge, InfoBadgePosition, InfoBadgeManager
 from .scroll_area import SingleDirectionScrollArea, SmoothScrollArea, ScrollArea
 from .slider import Slider, HollowHandleStyle, ClickableSlider, ToolTipSlider

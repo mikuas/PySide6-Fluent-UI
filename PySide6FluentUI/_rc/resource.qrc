@@ -409,6 +409,7 @@
         <file>qss/dark/dialog.qss</file>
         <file>qss/dark/expand_setting_card.qss</file>
         <file>qss/dark/menu.qss</file>
+        <file>qss/dark/menu_bar.qss</file>
         <file>qss/dark/message_dialog.qss</file>
         <file>qss/dark/setting_card.qss</file>
         <file>qss/dark/setting_card_group.qss</file>
@@ -444,6 +445,7 @@
         <file>qss/light/dialog.qss</file>
         <file>qss/light/expand_setting_card.qss</file>
         <file>qss/light/menu.qss</file>
+        <file>qss/light/menu_bar.qss</file>
         <file>qss/light/message_dialog.qss</file>
         <file>qss/light/setting_card.qss</file>
         <file>qss/light/setting_card_group.qss</file>

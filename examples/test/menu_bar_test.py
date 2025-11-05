@@ -2,23 +2,23 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QMenuBar, QMenu, QGraphicsOpacityEffect
 )
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint, QParallelAnimationGroup
 from PySide6.QtGui import QPainter, QAction
-
-from PySide6FluentUI import RoundMenu as RM, MenuAnimationType
 
 
 class AnimatedMenu(QMenu):
     """带WinUI弹出动画的QMenu"""
     def __init__(self, title="", parent=None):
         super().__init__(title, parent)
+        self.aniGroup: QParallelAnimationGroup = QParallelAnimationGroup(self)
 
+        self.__initOpacityEffect()
+        self.__initAnimation()
 
-        self._opacity_effect = None
-        self._opacity_anim = None
-        self._pos_anim = None
-        self._start_pos = None
-        self._end_pos = None
+        self.aniGroup.addAnimation(self.opacityAni)
+        self.aniGroup.addAnimation(self.posAni)
+        self.startPos = None
+        self.endPos = None
 
         # Fluent样式
         self.setStyleSheet("""
@@ -27,6 +27,7 @@ class AnimatedMenu(QMenu):
                 border: 1px solid rgba(0,0,0,0.15);
                 border-radius: 8px;
                 padding: 6px;
+                outline: none;
             }
             QMenu::item {
                 padding: 6px 20px;
@@ -39,34 +40,32 @@ class AnimatedMenu(QMenu):
             }
         """)
 
+    def __initOpacityEffect(self):
+        self.opacityEffect = QGraphicsOpacityEffect(self)
+        self.setGraphicsEffect(self.opacityEffect)
+        self.opacityEffect.setOpacity(0.0)
+
+    def __initAnimation(self):
+        self.opacityAni = QPropertyAnimation(self.opacityEffect, b"opacity", self)
+        self.posAni = QPropertyAnimation(self, b"pos", self)
+
+        self.opacityAni.setDuration(180)
+        self.posAni.setDuration(180)
+        self.opacityAni.setEasingCurve(QEasingCurve.OutCubic)
+        self.posAni.setEasingCurve(QEasingCurve.OutCubic)
+
     def showEvent(self, event):
         super().showEvent(event)
+        self.opacityAni.setStartValue(0.0)
+        self.opacityAni.setEndValue(1.0)
 
-        # 每次弹出都重新创建Effect和动画（避免被销毁）
-        self._opacity_effect = QGraphicsOpacityEffect(self)
-        self.setGraphicsEffect(self._opacity_effect)
-        self._opacity_effect.setOpacity(0.0)
+        self.startPos = self.pos() - QPoint(0, 8)
+        self.endPos = self.pos()
 
-        self._opacity_anim = QPropertyAnimation(self._opacity_effect, b"opacity", self)
-        self._opacity_anim.setDuration(180)
-        self._opacity_anim.setStartValue(0.0)
-        self._opacity_anim.setEndValue(1.0)
-        self._opacity_anim.setEasingCurve(QEasingCurve.OutCubic)
+        self.posAni.setStartValue(self.startPos)
+        self.posAni.setEndValue(self.endPos)
 
-        # 弹出位置轻微偏移（下滑效果）
-        self._start_pos = self.pos() - QPoint(0, 8)
-        self._end_pos = self.pos()
-        self.move(self._start_pos)
-
-        self._pos_anim = QPropertyAnimation(self, b"pos", self)
-        self._pos_anim.setDuration(180)
-        self._pos_anim.setStartValue(self._start_pos)
-        self._pos_anim.setEndValue(self._end_pos)
-        self._pos_anim.setEasingCurve(QEasingCurve.OutCubic)
-
-        # 同步启动
-        self._opacity_anim.start()
-        self._pos_anim.start()
+        self.aniGroup.start()
 
 
 class WinUIMenuBar(QMenuBar):
@@ -76,7 +75,6 @@ class WinUIMenuBar(QMenuBar):
         self.setStyleSheet("""
             QMenuBar {
                 background-color: #f3f3f3;
-                border-bottom: 1px solid rgba(0,0,0,0.1);
                 padding: 4px 8px;
                 font-family: "Segoe UI";
                 font-size: 13px;
@@ -94,7 +92,6 @@ class WinUIMenuBar(QMenuBar):
         """)
 
     def createMenu(self, title):
-
         return AnimatedMenu(title, self)
 
 

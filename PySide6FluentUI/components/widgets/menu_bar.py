@@ -1,28 +1,48 @@
 # coding:utf-8
-from PySide6.QtWidgets import QMenuBar
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QPoint
+from PySide6.QtWidgets import QMenuBar, QMenu, QGraphicsOpacityEffect
 
-from .menu import RoundMenu, MenuAnimationType
-from ...common.icon import Action
+from ...common.style_sheet import FluentStyleSheet
+
+
+class AnimatedMenu(QMenu):
+    def __init__(self, title="", parent=None):
+        super().__init__(title, parent)
+        FluentStyleSheet.MENU_BAR.apply(self)
+
+    def __createAni(self):
+        self.opacityEffect: QGraphicsOpacityEffect = QGraphicsOpacityEffect(self)
+        self.opacityAni: QPropertyAnimation = QPropertyAnimation(self.opacityEffect, b"opacity", self)
+        self.posAni: QPropertyAnimation = QPropertyAnimation(self, b"pos", self)
+
+        self.opacityAni.setDuration(180)
+        self.opacityAni.setEasingCurve(QEasingCurve.OutCubic)
+        self.posAni.setDuration(180)
+        self.posAni.setEasingCurve(QEasingCurve.OutCubic)
+
+        self.setGraphicsEffect(self.opacityEffect)
+        self.opacityEffect.setOpacity(0.0)
+
+        self.opacityAni.setStartValue(0.0)
+        self.opacityAni.setEndValue(1.0)
+        self.posAni.setStartValue(self.pos() - QPoint(0, 8))
+        self.posAni.setEndValue(self.pos())
+
+        self.opacityAni.start()
+        self.posAni.start()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.__createAni()
 
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.menus = []
-    
-    def addMenu(self, title: str):
-        menu = RoundMenu(title, self)
-        action = Action(title, self)
-        action.triggered.connect(lambda: self.showMenu(menu, action))
-        self.addAction(action)
-        self.menus.append(menu)
-        return menu
+        FluentStyleSheet.MENU_BAR.apply(self)
 
-    def showMenu(self, menu: RoundMenu, action: Action):
-        pos = self.mapToGlobal(self.actionGeometry(action).bottomLeft())
-        pos.setX(pos.x() + 10)
-        menu.exec(pos)
-    
-    def enterEvent(self, event):
-        print("ENTER")
-        return super().enterEvent(event)
+    def enableTransparentBackground(self, enable: bool):
+        self.setProperty("isTransparent", enable)
+
+    def createMenu(self, title: str) -> AnimatedMenu:
+        return AnimatedMenu(title, self)

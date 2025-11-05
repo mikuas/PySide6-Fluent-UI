@@ -9,7 +9,7 @@ from PySide6FluentUI import RoundListView, isDarkTheme, RoundListWidget, Splitte
 from examples.window.splitWidget.demo import Interface
 
 
-class Window(Interface):
+class PopupViewInterface(Interface):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.popupView: PopupView = PopupView(self)
@@ -27,7 +27,7 @@ class Window(Interface):
 
 def main():
     app = QApplication(sys.argv)
-    window = Window()
+    window = PopupViewInterface()
     window.resize(800, 520)
     window.show()
     sys.exit(app.exec())

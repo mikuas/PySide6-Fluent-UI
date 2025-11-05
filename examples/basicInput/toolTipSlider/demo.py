@@ -79,7 +79,7 @@ from PySide6FluentUI import Slider, isDarkTheme, ToolTipSlider
 #         self.__timer.start(300)
 
 
-class Window(Interface):
+class ToolTipSliderInterface(Interface):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.box: QHBoxLayout = QHBoxLayout(self)
@@ -98,11 +98,13 @@ class Window(Interface):
         
     def connectSignalSlot(self):
         super().connectSignalSlot()
+        self.hSlider.valueChanged.connect(print)
+        self.vSlider.valueChanged.connect(print)
         
 
 def main():
     app = QApplication(sys.argv)
-    window = Window()
+    window = ToolTipSliderInterface()
     window.resize(800, 520)
     window.show()
     sys.exit(app.exec())

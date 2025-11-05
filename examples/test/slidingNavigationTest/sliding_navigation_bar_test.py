@@ -5,12 +5,11 @@ from PySide6.QtWidgets import QWidget, QFrame, QHBoxLayout
 from PySide6.QtCore import Qt, QRect, Signal, QPropertyAnimation, QPoint, QTimer, QEvent, QEasingCurve
 from PySide6.QtGui import QPainter, QColor, QFontMetrics, QPen, QIcon
 
-from ...common.color import themeColor, isDarkTheme
-from ...common.font import setFont
-from ...common.icon import FluentIcon, FluentIconBase, toQIcon
-from ...components.navigation.navigation_panel import RouteKeyError
-from ...components.widgets.tool_tip import setToolTipInfo, ToolTipPosition
-from ..widgets.scroll_widget import SingleDirectionScrollArea
+
+from PySide6FluentUI import themeColor, isDarkTheme, setFont, FluentIcon, FluentIconBase, setToolTipInfo, ToolTipPosition, \
+    SingleDirectionScrollArea
+from PySide6FluentUI.common.icon import toQIcon
+from PySide6FluentUI.components.navigation.navigation_panel import RouteKeyError
 
 
 class SlidingWidget(QWidget):

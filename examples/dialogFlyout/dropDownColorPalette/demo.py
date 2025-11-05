@@ -62,7 +62,7 @@ class CustomWidget(QWidget):
         painter.drawText(self.rect(), Qt.AlignCenter, "迪亚我是你爸爸")
 
 
-class Window(Interface):
+class DropDownColorPaletteInterface(Interface):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.box: QVBoxLayout = QVBoxLayout(self)
@@ -91,7 +91,7 @@ class Window(Interface):
 
 def main():
     app = QApplication(sys.argv)
-    window = Window()
+    window = DropDownColorPaletteInterface()
     window.resize(800, 520)
     window.show()
     sys.exit(app.exec())

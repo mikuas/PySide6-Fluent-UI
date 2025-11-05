@@ -8,7 +8,7 @@ from PySide6FluentUI import ScreenColorPicker, themeColor
 from examples.window.splitWidget.demo import Interface
 
 
-class Window(Interface):
+class ScreenColorPickerInterface(Interface):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.box: QVBoxLayout = QVBoxLayout(self)
@@ -29,7 +29,7 @@ class Window(Interface):
 
 def main():
     app = QApplication(sys.argv)
-    window = Window()
+    window = ScreenColorPickerInterface()
     window.resize(800, 520)
     window.show()
     sys.exit(app.exec())

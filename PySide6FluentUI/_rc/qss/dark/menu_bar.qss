@@ -1,8 +1,9 @@
 AnimatedMenu {
     background-color: #292929;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    padding: 6px;
+    padding: 8px;
+    font: 14px 'Segoe UI', 'Microsoft YaHei', 'PingFang SC';
 }
 
 AnimatedMenu::item {
@@ -11,8 +12,22 @@ AnimatedMenu::item {
     color: #FFFFFF;
 }
 
+AnimatedMenu::separator {
+    height: 1px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 6px 0px;
+}
+
+AnimatedMenu::right-arrow {
+    image: url(:/qfluentwidgets/images/icons/ChevronRight_white.svg);
+    width: 12px;
+    height: 12px;
+    padding-right: 6px;
+}
+
 AnimatedMenu::item:selected {
-    background-color: rgba(237, 237, 237, 0.15);
+    background-color: rgba(237, 237, 237, 0.1);
 }
 
 QMenuBar {

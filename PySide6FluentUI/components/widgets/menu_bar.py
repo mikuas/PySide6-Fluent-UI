@@ -1,39 +1,80 @@
 # coding:utf-8
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QPoint
-from PySide6.QtWidgets import QMenuBar, QMenu, QGraphicsOpacityEffect
+from typing import Union
+
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QPoint, Qt, QRect, QSize, QEvent
+from PySide6.QtWidgets import QMenuBar, QMenu, QGraphicsOpacityEffect, QWidget, QApplication
 
 from ...common.style_sheet import FluentStyleSheet
 
 
 class AnimatedMenu(QMenu):
-    def __init__(self, title="", parent=None):
+    def __init__(self, title="", parent: QWidget = None):
         super().__init__(title, parent)
+        parent.window().installEventFilter(self)
+        self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus | Qt.Dialog)
+        self.setFocusPolicy(Qt.NoFocus)
         FluentStyleSheet.MENU_BAR.apply(self)
+        self.geometryAni: QPropertyAnimation = QPropertyAnimation(self, b"geometry", self)
+        self.opacityAni: QPropertyAnimation = QPropertyAnimation(self)
 
-    def __createAni(self):
-        self.opacityEffect: QGraphicsOpacityEffect = QGraphicsOpacityEffect(self)
-        self.opacityAni: QPropertyAnimation = QPropertyAnimation(self.opacityEffect, b"opacity", self)
-        self.posAni: QPropertyAnimation = QPropertyAnimation(self, b"pos", self)
-
+        self.geometryAni.setDuration(200)
+        self.geometryAni.setEasingCurve(QEasingCurve.Type.OutCubic)
         self.opacityAni.setDuration(180)
         self.opacityAni.setEasingCurve(QEasingCurve.OutCubic)
-        self.posAni.setDuration(180)
-        self.posAni.setEasingCurve(QEasingCurve.OutCubic)
+        self.opacityAni.setPropertyName(b"opacity")
 
-        self.setGraphicsEffect(self.opacityEffect)
-        self.opacityEffect.setOpacity(0.0)
+        self.triggered.connect(self.hide)
 
-        self.opacityAni.setStartValue(0.0)
-        self.opacityAni.setEndValue(1.0)
-        self.posAni.setStartValue(self.pos() - QPoint(0, 8))
-        self.posAni.setEndValue(self.pos())
-
-        self.opacityAni.start()
-        self.posAni.start()
+    # def mousePressEvent(self, e: QMouseEvent):
+    #     action = self.actionAt(e.position().toPoint())
+    #     if action and not action.menu() and e.button() == Qt.MouseButton.LeftButton:
+    #         self.fadeOut()
+    #         self.hide()
+    #     super().mousePressEvent(e)
 
     def showEvent(self, event):
         super().showEvent(event)
-        self.__createAni()
+        # try:
+        #     self.opacityAni.finished.disconnect(self.hide)
+        # except (TypeError, RuntimeError): ...
+        self.opacityEffect: QGraphicsOpacityEffect = QGraphicsOpacityEffect(self)
+        self.opacityAni.setTargetObject(self.opacityEffect)
+        self.setGraphicsEffect(self.opacityEffect)
+        size = self.sizeHint()
+        startRect = QRect(self.pos(), QSize(size.width(), 0))
+
+        self.geometryAni.setStartValue(startRect)
+        self.geometryAni.setEndValue(QRect(self.pos(), size))
+        self.opacityAni.setStartValue(0.0)
+        self.opacityAni.setEndValue(1.0)
+
+        self.setGeometry(startRect)
+        self.opacityAni.start()
+        self.geometryAni.start()
+
+    def fadeOut(self):
+        try:
+            self.opacityAni.finished.disconnect(self.hide)
+        except (TypeError, RuntimeError): ...
+        self.opacityAni.setStartValue(1.0)
+        self.opacityAni.setEndValue(0.0)
+        self.opacityAni.start()
+        self.opacityAni.finished.connect(self.hide)
+
+    def exec(self, pos: Union[QPoint, None] = None):
+        if pos:
+            self.hide()
+            self.move(pos)
+        self.show()
+
+    def exec_(self, pos: Union[QPoint, None] = None):
+        self.exec(pos)
+
+    def eventFilter(self, watched, event):
+        if event.type() in [QEvent.Type.MouseButtonPress, QEvent.Type.Move] and self.isVisible():
+            self.hide()
+
+        return super().eventFilter(watched, event)
 
 
 class MenuBar(QMenuBar):
@@ -43,6 +84,8 @@ class MenuBar(QMenuBar):
 
     def enableTransparentBackground(self, enable: bool):
         self.setProperty("isTransparent", enable)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def createMenu(self, title: str) -> AnimatedMenu:
         return AnimatedMenu(title, self)

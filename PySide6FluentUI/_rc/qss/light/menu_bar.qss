@@ -13,11 +13,22 @@ AnimatedMenu::separator {
     margin: 6px 0px;
 }
 
+AnimatedMenu::indicator:checked {
+    image: url(:/qfluentwidgets/images/icons/Accept_black.svg);
+    width: 10px;
+    height: 10px;
+    padding-left: 8px;
+}
+
+AnimatedMenu::icon {
+    padding-left: 18px;
+}
+
 AnimatedMenu::right-arrow {
     image: url(:/qfluentwidgets/images/icons/ChevronRight_black.svg);
     width: 12px;
     height: 12px;
-    padding-right: 6px;
+    padding-right: 8px;
 }
 
 AnimatedMenu::item {

@@ -27,3 +27,14 @@ QMenu::right-arror {
     ...
 }
 ```
+
+### 4. 设置选中样式 
+```qss
+AnimatedMenu::indicator:checked {
+    image: url(:/qfluentwidgets/images/icons/Accept_white.svg);
+    width: 10px;
+    height: 10px;
+    padding-left: 8px;
+}
+
+```

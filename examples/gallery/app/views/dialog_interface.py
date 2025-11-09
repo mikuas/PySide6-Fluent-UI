@@ -113,13 +113,13 @@ class DialogInterface(Interface):
         self.setObjectName("DialogInterface")
         self.vBoxLayout.addWidget(self.scrollArea)
 
-        self.showDialogButton: PrimaryPushButton = PrimaryPushButton("显示对话框", self)
-        self.addExamplesCard(
-            "对话框",
-            self.showDialogButton
-        )
-
-        self.showDialogButton.clicked.connect(lambda: Dialog("我是一个对话框", "我是对话框的内容 Dialog 是模态无边框对话框，用于用于消息提示、确认消息和提交内容。该对话框会中断用户操作，直到用户确认知晓后才可关闭。", self.window()).exec())
+        # self.showDialogButton: PrimaryPushButton = PrimaryPushButton("显示对话框", self)
+        # self.addExamplesCard(
+        #     "对话框",
+        #     self.showDialogButton
+        # )
+        #
+        # self.showDialogButton.clicked.connect(lambda: Dialog("我是一个对话框", "我是对话框的内容 Dialog 是模态无边框对话框，用于用于消息提示、确认消息和提交内容。该对话框会中断用户操作，直到用户确认知晓后才可关闭。", self.window()).exec())
 
         widget = QWidget()
         layout = QHBoxLayout(widget)

@@ -102,7 +102,7 @@ class PopupDrawerWidget(QFrame):
     def setTitleText(self, text: str):
         self._title.setText(text)
 
-    def setAniType(self, aniType: QEasingCurve.Type):
+    def setEasingCurve(self, aniType: QEasingCurve.Type):
         self.__geometryAni.setEasingCurve(aniType)
 
     def setRoundRadius(self, tl: float, tr: float, br: float, bl: float):

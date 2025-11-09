@@ -62,17 +62,17 @@ class SlidingNavigationBarInterface(Interface):
         self.connectSignalSlot()
 
     def _onCurrentItemChanged(self, item: SlidingWidget):
-        print(f"{item.text() = }\n{item.icon() = }\n{item.iconSize() = }\n{item.itemColor() = }\n{item.itemHoverColor() = }"
-              f"\n{item.itemSelectedColor() = }\n\n\n")
+        print(f"\n\n{item.text() = }\n{item.icon() = }\n{item.iconSize() = }\n{item.itemColor() = }\n{item.itemHoverColor() = }"
+              f"\n{item.itemSelectedColor() = }")
 
     def _onClickedGetRouteKeyButton(self):
-        print(f"RouteKey: {self.slidingNavigationBar.currentItem().routeKey()}")
+        print(f"\nRouteKey: {self.slidingNavigationBar.currentItem().routeKey()}")
 
     def _onClickedGetCurrentItemButton(self):
-        print(f"CurrentItem: {self.slidingNavigationBar.currentItem()}")
+        print(f"\nCurrentItem: {self.slidingNavigationBar.currentItem()}")
 
     def _onClickedGetAllItemButton(self):
-        print(f"AllItem: {[item.routeKey() for item in self.slidingNavigationBar.allItem()]}")
+        print(f"\nAllItem: {[item.routeKey() for item in self.slidingNavigationBar.allItem()]}")
 
     def _onReturnPressedEdit(self):
         self.slidingNavigationBar.setCurrentIndex(int(self.setCurrentIndexEdit.text()))

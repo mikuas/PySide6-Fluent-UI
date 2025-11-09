@@ -121,7 +121,7 @@ class HomeInterface(SmoothScrollArea):
         painter = QPainter(self.viewport())
         painter.setRenderHints(QPainter.Antialiasing | QPainter.LosslessImageRendering)
         painter.setPen(Qt.NoPen)
-        w, h = self.width(), 446
+        w, h = self.width(), int(self.height() // 1.5)
         rect = QRect(0, 0, w, h)
 
         painter.setClipPath(addRoundPath(rect, 12, 0, 0, 0))

@@ -136,12 +136,6 @@ class PaymentMessageBox(MessageBoxBase):
         self.cancelButton.setText("下次一定")
         self.yesButton.setText("切换支付方式")
 
-        self.hide()
-
-    def showEvent(self, e):
-        self.raise_()
-        super().showEvent(e)
-
     def validate(self):
         pay = "Alipay" if self.paymentWidget.property("Pay") == "WeChat" else "WeChat"
         self.paymentWidget.setProperty("Pay", pay)
@@ -157,7 +151,6 @@ class Interface(QWidget):
 
         self.__initWidget(title, content)
         self.__initScrollArea()
-        self.initPaymentMessageBox()
         self.documentButton.clicked.connect(self._openDocumentPage)
         self.sourceCodeButton.clicked.connect(self._openSourceCodePage)
         self.toggleThemeButton.clicked.connect(self._onToggleButton)
@@ -166,6 +159,7 @@ class Interface(QWidget):
             [self.documentButton, self.sourceCodeButton, self.toggleThemeButton, self.likeButton],
             ["查看在线文档", "查看源代码", "切换主题", "支持一下作者🥰"], 2500, ToolTipPosition.TOP
         )
+        self.likeButton.clicked.connect(lambda: PaymentMessageBox("支持作者", self.window()).exec())
 
     def __initWidget(self, title: str, content: str):
         self.title: TitleLabel = TitleLabel(title, self)
@@ -210,10 +204,6 @@ class Interface(QWidget):
         self.scrollLayout.setContentsMargins(0, 0, 18, 0)
         self.scrollLayout.setSpacing(18)
         self.scrollLayout.setAlignment(Qt.AlignTop)
-    
-    def initPaymentMessageBox(self):
-        self.paymentMessageBox: PaymentMessageBox = PaymentMessageBox("支持作者", self.window())
-        self.likeButton.clicked.connect(self.paymentMessageBox.show)
 
     def addExamplesCard(self, title: str, widget: QWidget, stretch=0):
         card = ExamplesCard(title, widget, stretch, self)

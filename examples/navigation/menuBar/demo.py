@@ -3,10 +3,10 @@ import sys
 from typing import List
 
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QMainWindow, QMenu
-from PySide6.QtGui import QColor, QAction
+from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
 
-from PySide6FluentUI import MenuBar, ToggleButton
+from PySide6FluentUI import MenuBar, ToggleButton, FluentIcon, Action as QAction, AnimatedMenu
 from examples.window.splitWidget.demo import Interface
 
 
@@ -17,20 +17,94 @@ class MainWindow(Interface):
         self.viewLayout: QVBoxLayout = QVBoxLayout(self)
         self.viewLayout.setContentsMargins(12, 35, 12, 12)
 
-        self.menuBar: MenuBar = MenuBar(self)
         self.toggleButton: ToggleButton = ToggleButton("Toggle", self)
+        self.menuBar: MenuBar = MenuBar(self)
 
-        self.createSubMenu(
-            "文件(&F)", 11, 6, 11, "历史文件", ["Ctrl", ["A", "B", "C", "D", "E", "", "F", "G", "H", "J"]]
-        ).createSubMenu(
-            "编辑(&E)", 16, 8, 16, "编辑历史", ["Shift", ["A", "B", "C", "D", "E", "F", "G", "", "H", "J", "K", "L", "M", "N", "O"]]
-        ).createSubMenu(
-            "视图(&V)", 25, 12, 11, "放大倍率", ["Ctrl+Shift", ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', '', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W']]
-        ).createSubMenu(
-            "选项(&O)", 7, 3, 7, "子选项", ["Ctrl+Alt", ["A", "B", "", "C", "D", "E"]]
-        ).createSubMenu(
-            "保存(&S)", 5, 2, 5, "另存为", ["Ctrl+Alt+Shift", ["A", "", "B",  "C", "D"]]
-        )
+        """ file menu """
+        self.fileMenu = self.menuBar.createMenu("文件(&F)")
+        self.fileMenu.addActions([
+            QAction("新建标签页", self, shortcut="Ctrl+N", triggered=lambda: print("新建标签页")),
+            QAction("新建窗口", self, shortcut="Ctrl+Shift+N", triggered=lambda: print("新建窗口")),
+            QAction("新建Markdown选项卡", self, triggered=lambda: print("新建Markdown选项卡")),
+            QAction("打开", self, shortcut="Ctrl+O", triggered=lambda: print("打开")),
+        ])
+
+        self.fileSubMenu = self.menuBar.createMenu("最近使用")
+        self.fileSubMenu.addAction(QAction("没有最近使用的文件", self))
+        self.fileMenu.addMenu(self.fileSubMenu)
+
+        self.fileMenu.addActions([
+            QAction("保存", self, shortcut="Ctrl+S", triggered=lambda: print("保存")),
+            QAction("另存为", self, shortcut="Ctrl+Shift+S", triggered=lambda: print("另存为")),
+            QAction("全部保存", self, shortcut="Ctrl+Alt+S", triggered=lambda: print("全部保存")),
+        ])
+        self.fileMenu.addSeparator()
+
+        self.fileMenu.addActions([
+            QAction("页面设置", self, triggered=lambda: print("页面设置")),
+            QAction("打印", self, shortcut="Ctrl+P", triggered=lambda: print("打印"))
+        ])
+        self.fileMenu.addSeparator()
+
+        self.fileMenu.addActions([
+            QAction("关闭选项卡", self, shortcut="Ctrl+W", triggered=lambda: print("关闭选项卡")),
+            QAction("关闭窗口", self, shortcut="Ctrl+Shift+W", triggered=lambda: print("关闭窗口")),
+            QAction("退出", self, shortcut="Ctrl+Q", triggered=QApplication.exit)
+        ])
+
+        """ edit menu """
+        self.editMenu = self.menuBar.createMenu("编辑(&E)")
+        self.editMenu.addAction(QAction("撤销", self, shortcut="Ctrl+Z", triggered=lambda: print("撤销")))
+        self.editMenu.addSeparator()
+
+        self.editMenu.addActions([
+            QAction(FluentIcon.CUT, "剪切", self, shortcut="Ctrl+X", triggered=lambda: print("剪切")),
+            QAction(FluentIcon.COPY, "复制", self, shortcut="Ctrl+C", triggered=lambda: print("复制")),
+            QAction(FluentIcon.PASTE, "粘贴", self, shortcut="Ctrl+V", triggered=lambda: print("粘贴")),
+            QAction(FluentIcon.DELETE, "删除", self, shortcut="Del", triggered=lambda: print("删除"))
+        ])
+        self.editMenu.addSeparator()
+
+        self.editMenu.addActions([
+            QAction("清除格式设置", self, triggered=lambda: print("清除格式设置")),
+            QAction("使用必应搜索", self, triggered=lambda: print("使用必应搜索"))
+        ])
+        self.editMenu.addSeparator()
+
+        self.editMenu.addActions([
+            QAction("查找", self, shortcut="Ctrl+F", triggered=lambda: print("查找")),
+            QAction("查找上一个", self, shortcut="F3", triggered=lambda: print("查找上一个")),
+            QAction("查找下一个", self, shortcut="Shift+F3", triggered=lambda: print("查找下一个")),
+            QAction("替换", self, shortcut="Ctrl+H", triggered=lambda: print("替换")),
+            QAction("转到", self, shortcut="Ctrl+G", triggered=lambda: print("转到")),
+        ])
+        self.editMenu.addSeparator()
+
+        self.editMenu.addActions([
+            QAction("全选", self, shortcut="Ctrl+A", triggered=lambda: print("全选")),
+            QAction("时间/日期", self, shortcut="F5", triggered=lambda: print("时间/日期")),
+        ])
+        self.editMenu.addSeparator()
+
+        self.editMenu.addAction(QAction("字体", self, triggered=lambda: print("字体")))
+
+        """ view menu """
+        self.viewMenu = self.menuBar.createMenu("查看(&V)")
+        self.zoomSubMenu = self.menuBar.createMenu("缩放")
+        self.zoomSubMenu.addActions([
+            QAction("放大", self, shortcut="Ctrl++", triggered=lambda: print("放大")),
+            QAction("缩小", self, shortcut="Ctrl+-", triggered=lambda: print("缩小")),
+            QAction("还原默认缩放", self, shortcut="Ctrl+R", triggered=lambda: print("还原默认缩放"))
+        ])
+        self.viewMenu.addMenu(self.zoomSubMenu)
+        self.viewMenu.addActions([
+            QAction("状态栏", self, triggered=lambda: print("状态栏"), checkable=True, checked=True),
+            QAction("自动换行", self, triggered=lambda: print("自动换行"), checkable=True, checked=True),
+        ])
+
+        self.menuBar.addMenu(self.fileMenu)
+        self.menuBar.addMenu(self.editMenu)
+        self.menuBar.addMenu(self.viewMenu)
 
         self.viewLayout.addWidget(self.menuBar, 0, Qt.AlignTop)
         self.viewLayout.addWidget(self.toggleButton)
@@ -42,24 +116,9 @@ class MainWindow(Interface):
             }
         )
 
-    def createSubMenu(self, title: str, rg: int, expandIndex: int, subRg: int, subTitle: str, shortcut: list[
-        str, list[str]]):
-        menu = self.menuBar.createMenu(title)
-        title = title.split("(")[0]
-        for i in range(1, rg):
-            if i == expandIndex:
-                subMenu = self.menuBar.createMenu(subTitle)
-                for _ in range(1, subRg):
-                    action = QAction(f"Sub Item {subTitle} {_}", self)
-                    subMenu.addAction(action)
-                menu.addMenu(subMenu)
-                menu.addSeparator()
-                continue
-            action = QAction(f"Item {title} {i}", self, shortcut=f"{shortcut[0]}+{shortcut[1][i - 1]}")
-            # action.setShortcut(f"{shortcut[0]}+{shortcut[1][i - 1]}")
-            menu.addAction(action)
-        self.menuBar.addMenu(menu)
-        return self
+    def contextMenuEvent(self, event):
+        self.fileMenu.exec(event.globalPos())
+        super().contextMenuEvent(event)
 
 
 if __name__ == "__main__":

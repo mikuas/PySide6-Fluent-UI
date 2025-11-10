@@ -1,10 +1,12 @@
 # coding:utf-8
-from typing import Union
+from typing import Union, Sequence
 
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QPoint, Qt, QRect, QSize, QEvent
-from PySide6.QtWidgets import QMenuBar, QMenu, QGraphicsOpacityEffect, QWidget, QApplication
+from PySide6.QtWidgets import QMenuBar, QMenu, QGraphicsOpacityEffect, QWidget
+from PySide6.QtGui import QAction
 
 from ...common.style_sheet import FluentStyleSheet
+from ...common.icon import Action
 
 
 class AnimatedMenu(QMenu):
@@ -69,6 +71,12 @@ class AnimatedMenu(QMenu):
 
     def exec_(self, pos: Union[QPoint, None] = None):
         self.exec(pos)
+
+    def addAction(self, action: Union[Action, QAction]):
+        super().addAction(action)
+
+    def addActions(self, actions: Union[Sequence[Action], Sequence[QAction]]):
+        super().addActions(actions)
 
     def eventFilter(self, watched, event):
         if event.type() in [QEvent.Type.MouseButtonPress, QEvent.Type.Move] and self.isVisible():

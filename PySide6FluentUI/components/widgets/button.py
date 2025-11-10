@@ -1,6 +1,7 @@
 # coding:utf-8
 import re
-from typing import Union, Tuple
+from enum import Enum
+from typing import Union
 
 from PySide6.QtCore import Signal, QUrl, Qt, QRectF, QSize, QPoint, Property, QRect
 from PySide6.QtGui import QDesktopServices, QIcon, QPainter, QColor, QPainterPath, QFontMetrics, QPen, QMouseEvent, \
@@ -1120,17 +1121,19 @@ class RoundButtonBase: # New
 
     def _postInit(self):
         super()._postInit()
-        self.tl, self.tr, self.bl, self.br = 16, 16, 16, 16
-        qconfig.themeChangedFinished.connect(self.__updateRadius)
+        self._tl: int = 16
+        self._tr: int = 16
+        self._bl: int = 16
+        self._br: int = 16
 
-    def __updateRadius(self):
+        qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
+
+    def _onThemeChangedFinished(self):
+        self._updateRadiusQss()
+
+    def _updateRadiusQss(self):
         qss = self.styleSheet()
-        radius = {
-            "top-left": self.tl,
-            "top-right": self.tr,
-            "bottom-left": self.bl,
-            "bottom-right": self.br
-        }
+        radius = {"top-left": self._tl, "top-right": self._tr, "bottom-left": self._bl, "bottom-right": self._br}
         for i in ["top", "bottom"]:
             for j in ["left", "right"]:
                 qss = re.sub(fr"border-{i}-{j}-radius:\s*\d+px;", f"border-{i}-{j}-radius: {radius[f"{i}-{j}"]}px;", qss)
@@ -1143,19 +1146,20 @@ class RoundButtonBase: # New
     def _drawBorder(self):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setPen(QColor(255, 255, 255, 32) if isDarkTheme() else QColor(32, 32, 32, 16))
+        painter.setPen(QColor(255, 255, 255, 32) if isDarkTheme() else QColor(0, 0, 0, 32))
         painter.setBrush(Qt.NoBrush)
         drawRoundRect(painter, QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), *self.radius())
 
     def radius(self):
-        return self.tl, self.tr, self.br, self.bl
+        return self._tl, self._tr, self._bl, self._br
 
-    def setRadius(self, tl: int, tr: int, br: int, bl: int):
-        r = min(self.width(), self.height()) / 2
+    def setRadius(self, tl: int, tr: int, br: int, bl: int) -> bool:
+        r = min(self.width(), self.height()) // 2
         if tl > r or tr > r or br > r or bl > r:
-            return
-        self.tl, self.tr, self.br, self.bl = tl, tr, br, bl
-        self.__updateRadius()
+            return False
+        self._tl, self._tr, self._bl, self._br = tl, tr, br, bl
+        self._updateRadiusQss()
+        return True
 
 
 class RoundPushButton(RoundButtonBase,  PushButton): # New
@@ -1183,11 +1187,15 @@ class FillButtonBase(RoundButtonBase): # New
 
     def _postInit(self):
         super()._postInit()
-        self.setRadius(6, 6, 6, 6)
-        try:
-            self.setFlat(True)
-        except AttributeError: ...
         self.__fillColor: QColor = None
+        self._palette: QPalette = self.palette()
+        self._lightTextColor: QColor = QColor(255, 255, 255)
+        self._darkTextColor: QColor = QColor(0, 0, 0)
+
+        self.setRadius(6, 6, 6, 6)
+        # try:
+        #     self.setFlat(True)
+        # except AttributeError: ...
 
     def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
         if icon is None or (isinstance(icon, QIcon) and icon.isNull()):
@@ -1196,7 +1204,7 @@ class FillButtonBase(RoundButtonBase): # New
             self.setProperty('hasIcon', True)
 
         if isinstance(icon, FluentIconBase):
-            icon = icon.colored(QColor(255, 255, 255), QColor(0, 0, 0))
+            icon = icon.colored(self._lightTextColor, self._darkTextColor)
 
         self.setStyle(QApplication.style())
         self._icon = icon or QIcon()
@@ -1209,6 +1217,31 @@ class FillButtonBase(RoundButtonBase): # New
             return
         self.__fillColor = color
         self.update()
+
+    def setTextColor(self, light: Union[QColor, str], dark: Union[QColor, str]):
+        if isinstance(light, str):
+            light = QColor(light)
+        if isinstance(dark, str):
+            dark = QColor(dark)
+
+        self._lightTextColor = light
+        self._darkTextColor = dark
+        self._updateButtonTextPalette(self.textColor())
+
+        if isinstance(self._icon, FluentIconBase):
+            self._icon = self._icon.colored(self._lightTextColor, self._darkTextColor)
+            self.update()
+
+    def textColor(self) -> QColor:
+        return autoFallbackThemeColor(self._lightTextColor, self._darkTextColor)
+
+    def _onThemeChangedFinished(self):
+        super()._onThemeChangedFinished()
+        self._updateButtonTextPalette(self.textColor())
+
+    def _updateButtonTextPalette(self, color: Union[QColor, str]):
+        self._palette.setColor(QPalette.ColorRole.ButtonText, color)
+        self.setPalette(self._palette)
 
     def paintEvent(self, e):
         painter = QPainter(self)
@@ -1251,31 +1284,27 @@ class OutlineButtonBase: # New
     def _postInit(self):
         super()._postInit()
         self.setCheckable(True)
-        self.setProperty("isCustomTextColor", True)
+        # self.__outlineWidth: float = 1.5
         self.__outlineColor: QColor = None
-        self.__palette: QPalette = self.palette()
+        self._palette: QPalette = self.palette()
 
         self.toggled.connect(self._updateIconColor)
-        qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
-
-        self._updateButtonTextPalette(self.noCheckedOutlineColor())
+        self._updateButtonTextPalette(autoFallbackThemeColor(QColor(0, 0, 0), QColor(255, 255, 255)))
 
     def _onThemeChangedFinished(self):
+        super()._onThemeChangedFinished()
         self._updateIconColor(self.isChecked())
 
     def _updateIconColor(self, isChecked: bool):
-        color = self.outlineColor() if isChecked else self.noCheckedOutlineColor()
+        color = self.outlineColor() if isChecked else autoFallbackThemeColor(QColor(0, 0, 0), QColor(255, 255, 255))
         if isinstance(self._icon, FluentIconBase):
             self.setIcon(self._icon.colored(color, color))
 
         self._updateButtonTextPalette(color)
 
-    def noCheckedOutlineColor(self) -> QColor:
-        return autoFallbackThemeColor(QColor(0, 0, 0), QColor(255, 255, 255))
-
-    def _updateButtonTextPalette(self, color: Union[str, QColor]):
-        self.__palette.setColor(QPalette.ColorRole.ButtonText, color)
-        self.setPalette(self.__palette)
+    def _updateButtonTextPalette(self, color: Union[QColor, str]):
+        self._palette.setColor(QPalette.ColorRole.ButtonText, color)
+        self.setPalette(self._palette)
 
     def setOutlineColor(self, color: Union[str, QColor]) -> None:
         if isinstance(color, str):
@@ -1283,10 +1312,20 @@ class OutlineButtonBase: # New
         if color == self.__outlineColor:
             return
         self.__outlineColor = color
+        self._updateIconColor(self.isChecked())
         self.update()
+
+    # def setOutlineWidth(self, width: float):
+    #     if width == self.__outlineWidth:
+    #         return
+    #     self.__outlineWidth = width
+    #     self.update()
 
     def outlineColor(self) -> QColor:
         return self.__outlineColor or themeColor()
+
+    # def outlineWidth(self) -> float:
+    #     return self.__outlineWidth
 
     def _drawBorder(self):
         painter = QPainter(self)
@@ -1295,8 +1334,9 @@ class OutlineButtonBase: # New
         color = self.outlineColor() if self.isChecked() else QColor(color, color, color, 18)
         pen = QPen(color)
         pen.setWidthF(1.5)
+        # pen.setWidthF(self.outlineWidth())
         painter.setPen(pen)
-        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.5, 0.7, -0.5, -0.5), *self.radius())
+        drawRoundRect(painter, QRectF(self.rect()).adjusted(0.8, 0.8, -0.5, -0.5), *self.radius())
 
 
 class OutlinePushButton(OutlineButtonBase, RoundPushButton): # New
@@ -1318,3 +1358,18 @@ class OutlineToolButton(OutlineButtonBase, RoundToolButton): # New
     * OutlineToolButton(`parent`: QWidget = None)
     * OutlineToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
     """
+
+
+class FilledType(Enum):
+
+    INFOMATION = 1
+    SUCCESS = 2
+    ATTENTION = 3
+    WARNING = 4
+    ERROR = 5
+
+
+class FilledPushButton(FillPushButton):
+
+    def _postInit(self):
+        super()._postInit()

@@ -9,27 +9,8 @@ PushButton, ToolButton, ToggleButton, ToggleToolButton {
     outline: none;
 }
 
-RoundPushButton {
-    background: rgba(255, 255, 255, 0.0605);
-    color: white;
-    padding: 5px 12px 6px 16px;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
-    padding: 5px 12px 6px 12px;
-    outline: none;
-}
-
 ToolButton {
     padding: 5px 9px 6px 8px;
-}
-
-RoundToolButton {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    border-bottom-left-radius: 16px;
-    border-bottom-right-radius: 16px;
 }
 
 PushButton[isPlaceholderText=true] {
@@ -69,22 +50,11 @@ PushButton:pressed, ToolButton:pressed, ToggleButton:pressed, ToggleToolButton:p
     border-top: 1px solid rgba(255, 255, 255, 0.053);
 }
 
-RoundPushButton:pressed {
-    color: rgba(255, 255, 255, 0.786);
-    background: rgba(255, 255, 255, 0.0326);
-}
-
 PushButton:disabled, ToolButton:disabled, ToggleButton:disabled, ToggleToolButton:disabled {
     color: rgba(255, 255, 255, 0.3628);
     background: rgba(255, 255, 255, 0.0419);
     border: 1px solid rgba(255, 255, 255, 0.053);
     border-top: 1px solid rgba(255, 255, 255, 0.053);
-}
-
-RoundPushButton:disabled {
-    color: rgba(255, 255, 255, 0.3628);
-    background: rgba(255, 255, 255, 0.0419);
-    border: 1px solid rgba(255, 255, 255, 0.053);
 }
 
 #splitPushButton:pressed,
@@ -337,19 +307,51 @@ PillToolButton:disabled:checked {
     border: none;
 }
 
+RoundPushButton {
+    color: white;
+    outline: none;
+    border: 1px solid transparent;
+    padding: 5px 12px 6px 12px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
+RoundToolButton {
+    outline: none;
+    border: 1px solid transparent;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
+RoundPushButton:pressed {
+    color: rgba(255, 255, 255, 0.786);
+    background: rgba(255, 255, 255, 0.0326);
+}
+
+RoundPushButton:disabled {
+    color: rgba(255, 255, 255, 0.3628);
+    background: rgba(255, 255, 255, 0.0419);
+    border: 1px solid rgba(255, 255, 255, 0.053);
+}
+
 FillPushButton, FillToolButton {
     background: transparent;
     border: none;
     outline: none;
     border-bottom: none;
-    color: black;
+    color: palette(ButtonText);
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
 }
 
-OutlinePushButton[isCustomTextColor="true"] {
+FillPushButton:pressed, FillToolButton:pressed {
+    background: transparent;
     color: palette(ButtonText);
 }
 
@@ -357,7 +359,11 @@ FillPushButton:hover, FillToolButton:hover {
     background: transparent;
 }
 
-FillPushButton:pressed, FillToolButton:pressed {
-    background: transparent;
-    color: rgba(0, 0, 0, 0.867);
+OutlinePushButton {
+    border: 1px solid transparent;
+    color: palette(ButtonText);
+}
+
+OutlineToolButton {
+    border: 1px solid transparent;
 }

@@ -544,6 +544,9 @@ class FlyoutDialog(PopupView):
             self.hide()
         self.exec(*self.positionManager.pos())
 
+    def setTarget(self, target: QWidget):
+        self.positionManager.setTarget(target)
+
 
 class FlyoutDialogManager:
     registry = {}
@@ -566,6 +569,9 @@ class FlyoutDialogManager:
         if operation not in cls.registry:
             raise ValueError(f"No operation registered for {operation}")
         return cls.registry[operation](view, target)
+
+    def setTarget(self, target: QWidget):
+        self.target = target
 
     def pos(self) -> Tuple[QPoint, QPoint]:
         raise NotImplementedError

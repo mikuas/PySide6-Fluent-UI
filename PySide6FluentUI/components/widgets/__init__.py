@@ -69,7 +69,7 @@ from .round_list_widget import RoundListWidget, RoundListWidgetItemDelegate, Rou
 from .multi_selection_combo_box import (
     MultiSelectionListItem, MultiSelectionItem, MultiSelectionListWidget, MultiSelectionItemCheckBox, MultiSelectionComboBox
 )
-from .drop_down_color_palette import BaseItem, ColorItem, DefaultColorPaletteItem, DropDownColorPalette
+from .drop_down_color_palette import BaseItem, ColorItem, DefaultColorPaletteItem, DropDownColorPalette, ColorView
 from .pin_box import PinBox, PinBoxLineEdit
 from .popup_view import PopupView, ContainerFrame, FrameView
 from .screen_color_picker import ScreenColorPicker, ScreenColorPickerView

@@ -3,7 +3,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QApplication
 
-from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge, SubtitleLabel, MenuBar
+from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge, SubtitleLabel, \
+    MenuBar, Action
 
 from ..widgets.basic_interface import Interface
 
@@ -46,7 +47,7 @@ class NavigationInterface(Interface):
         self.fileMenu.addActions([
             QAction("关闭选项卡", self, shortcut="Ctrl+W", triggered=lambda: print("关闭选项卡")),
             QAction("关闭窗口", self, shortcut="Ctrl+Shift+W", triggered=lambda: print("关闭窗口")),
-            QAction("退出", self, shortcut="Ctrl+Q", triggered=QApplication.exit)
+            QAction("退出", self, shortcut="Ctrl+Q")
         ])
 
         """ edit menu """
@@ -55,10 +56,10 @@ class NavigationInterface(Interface):
         self.editMenu.addSeparator()
 
         self.editMenu.addActions([
-            QAction("剪切", self, shortcut="Ctrl+X", triggered=lambda: print("剪切")),
-            QAction("复制", self, shortcut="Ctrl+C", triggered=lambda: print("复制")),
-            QAction("粘贴", self, shortcut="Ctrl+V", triggered=lambda: print("粘贴")),
-            QAction("删除", self, shortcut="Del", triggered=lambda: print("删除"))
+            Action(FluentIcon.CUT, "剪切", self, shortcut="Ctrl+X", triggered=lambda: print("剪切")),
+            Action(FluentIcon.COPY, "复制", self, shortcut="Ctrl+C", triggered=lambda: print("复制")),
+            Action(FluentIcon.PASTE, "粘贴", self, shortcut="Ctrl+V", triggered=lambda: print("粘贴")),
+            Action(FluentIcon.DELETE, "删除", self, shortcut="Del", triggered=lambda: print("删除"))
         ])
         self.editMenu.addSeparator()
 

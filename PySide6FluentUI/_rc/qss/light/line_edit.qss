@@ -80,3 +80,15 @@ FocusLineEdit:disabled {
     outline: none;
     border-bottom: none;
 }
+
+CustomLineEdit {
+    border: none;
+    outline: none;
+    padding: 0px;
+    padding-top: 14px;
+    padding-bottom: 15px;
+    background: transparent;
+    min-height: 28px;
+    max-height: 28px;
+    selection-background-color: --ThemeColorLight1;
+}

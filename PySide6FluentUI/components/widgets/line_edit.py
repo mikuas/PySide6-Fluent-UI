@@ -1,10 +1,10 @@
 # coding: utf-8
 from typing import List, Union
-from PySide6.QtCore import QSize, Qt, QRectF, Signal, QPoint, QTimer, QEvent, QAbstractItemModel, Property, QModelIndex
-from PySide6.QtGui import QPainter, QPainterPath, QIcon, QColor, QAction, QPen
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLineEdit, QToolButton, QTextEdit,
-                               QPlainTextEdit, QCompleter, QStyle, QWidget, QTextBrowser)
-
+from PySide6.QtCore import QSize, Qt, QRectF, Signal, QPoint, QTimer, QEvent, QAbstractItemModel, Property, QModelIndex, \
+    QEasingCurve, QPropertyAnimation
+from PySide6.QtGui import QPainter, QPainterPath, QIcon, QColor, QAction, QPen, QFont
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QLineEdit, QToolButton, QTextEdit,  QPlainTextEdit, \
+    QCompleter, QWidget, QTextBrowser
 
 from ...common.style_sheet import FluentStyleSheet, themeColor
 from ...common.icon import isDarkTheme, FluentIconBase, drawIcon
@@ -12,7 +12,7 @@ from ...common.icon import FluentIcon as FIF
 from ...common.font import setFont
 from ...common.color import FluentSystemColor, autoFallbackThemeColor
 from .tool_tip import ToolTipFilter
-from .button import  PushButton
+from .button import PushButton
 from .menu import LineEditMenu, TextEditMenu, RoundMenu, MenuAnimationType, IndicatorMenuItemDelegate
 from .scroll_bar import SmoothScrollDelegate
 
@@ -98,7 +98,7 @@ class LineEdit(QLineEdit):
         self.leftButtons = []   # type: List[LineEditButton]
         self.rightButtons = []  # type: List[LineEditButton]
 
-        self.setProperty("transparent", True)
+        # self.setProperty("transparent", True)
         FluentStyleSheet.LINE_EDIT.apply(self)
         self.setFixedHeight(33)
         self.setAttribute(Qt.WA_MacShowFocusRect, False)
@@ -592,30 +592,151 @@ class LabelLineEdit(LineEdit):
 
 
 class FocusLineEdit(LineEdit):
-    focusOutSignal = Signal()
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.lightBorderColor: QColor = QColor(0, 0, 0, 32)
-        self.darkBorderColor: QColor = QColor(255, 255, 255, 32)
-
-    def setBorderColor(self, light: Union[str, QColor], dark: Union[str, QColor]) -> None:
-        self.lightBorderColor, self.darkBorderColor = light, dark
-        self.update()
-
-    def borderColor(self) -> QColor:
-        return autoFallbackThemeColor(self.lightBorderColor, self.darkBorderColor)
-
-    def focusOutEvent(self, e):
-        super().focusOutEvent(e)
-        self.focusOutSignal.emit()
 
     def paintEvent(self, e):
         QLineEdit.paintEvent(self, e)
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        pen = QPen(self.focusedBorderColor() if self.hasFocus() else self.borderColor())
+        pen = QPen(self.focusedBorderColor() if self.hasFocus() else autoFallbackThemeColor(QColor(0, 0, 0, 32), QColor(255, 255, 255, 32)))
         pen.setWidth(2)
         painter.setPen(pen)
         painter.setBrush(Qt.NoBrush)
         painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)
+
+
+class MotionLineEdit(FocusLineEdit):
+    def __init__(self, title: str = "", parent=None):
+        super().__init__(parent)
+        self._titleText: str = title
+        self._placeholderText: str = ""
+        self._underlineValue: float = 0.0
+        self._textPos: QPoint = QPoint()
+        self.setFixedHeight(34)
+        self.__initAnimation()
+
+    def __initAnimation(self):
+        self._underlineAni: QPropertyAnimation = QPropertyAnimation(self, b"underlineValue")
+        self._titlePosAni: QPropertyAnimation = QPropertyAnimation(self, b"titlePosValue")
+
+        self._underlineAni.setEasingCurve(QEasingCurve.Type.InQuad)
+        self._underlineAni.setDuration(400)
+        self._titlePosAni.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._titlePosAni.setDuration(400)
+
+    def getUnderlineValue(self) -> float:
+        return self._underlineValue
+
+    def setUnderlineValue(self, value: float) -> None:
+        self._underlineValue = value
+        self.update()
+
+    def getTextPos(self) -> QPoint:
+        return self._textPos
+
+    def setTextPos(self, pos: QPoint) -> None:
+        self._textPos = pos
+
+    def setTitle(self, title: str) -> None:
+        if title == self._titleText:
+            return
+        self._titleText = title
+        self.update()
+
+    def title(self) -> str:
+        return self._titleText
+
+    def setPlaceholderText(self, text: str):
+        if text == self._placeholderText:
+            return
+        self._placeholderText = text
+        self.update()
+
+    def placeholderText(self) -> str:
+        return self._placeholderText
+
+    def paintEvent(self, e):
+        QLineEdit.paintEvent(self, e)
+        x = self.width()
+        y = self.height() - 18
+        font = QFont()
+        font.setFamilies(['Segoe UI', 'Microsoft YaHei', 'PingFang SC'])
+
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+        painter.setBrush(Qt.NoBrush)
+        alpha = 128 if self.isEnabled() else 64
+        pen = QPen(autoFallbackThemeColor(QColor(0, 0, 0, alpha), QColor(255, 255, 255, alpha)), 1.5)
+        painter.setPen(pen)
+        painter.drawLine(0, y, x, y)
+
+        """ draw placeholder text """
+        self._drawPlaceholderText(painter, pen, font)
+
+        """ draw title """
+        self._drawTitle(painter, pen, font)
+
+        """ draw focus line """
+        self._drawFocusLine(painter, pen, y)
+
+    def focusOutEvent(self, e):
+        super().focusOutEvent(e)
+        self._changeAniValue(self.getUnderlineValue(), 0.0, self.getTextPos(), QPoint(29 * len(self.actions()), 0))
+
+    def focusInEvent(self, e):
+        super().focusInEvent(e)
+        self._changeAniValue(0.0, 1.0, QPoint(29 * len(self.actions()), 0), QPoint(0, self.height() - 19))
+
+    def _drawFocusLine(self, painter: QPainter, pen: QPen, y: int):
+        value = self.getUnderlineValue()
+        if value > 0.0:
+            x1 = 0
+            x2 = self.width()
+            center = (x1 + x2) / 2
+            halfLength = (x2 - x1) / 2 * value
+            x1 = int(center - halfLength)
+            x2 = int(center + halfLength)
+
+            pen.setWidthF(2.5)
+            pen.setBrush(self.focusedBorderColor())
+            painter.setPen(pen)
+            # painter.drawLine(0, y, value, y)
+            painter.drawLine(x1, y, x2, y)
+
+    def _drawPlaceholderText(self, painter: QPainter, pen: QPen, font: QFont):
+        if self.hasFocus():
+            painter.setPen(pen)
+            font.setPixelSize(14)
+            painter.setFont(font)
+            painter.drawText(self.rect(), self.placeholderText(), Qt.AlignBottom)
+
+    def _drawTitle(self, painter: QPainter, pen: QPen, font: QFont):
+        painter.setPen(pen)
+        font.setPixelSize(16)
+        painter.setFont(font)
+        pos = self.getTextPos()
+        painter.drawText(self.rect().adjusted(5 + pos.x(), 0, 5, -pos.y()), self.title(), Qt.AlignVCenter)
+
+    def _changeAniValue(self, usv: float, uev: float, tsp: QPoint, tep: QPoint):
+        self._underlineAni.stop()
+        self._titlePosAni.stop()
+
+        self._underlineAni.setStartValue(usv)
+        self._underlineAni.setEndValue(uev)
+        self._underlineAni.start()
+        if not self.text():
+            self._titlePosAni.setStartValue(tsp)
+            self._titlePosAni.setEndValue(tep)
+            self._titlePosAni.start()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        value = self.getUnderlineValue()
+        if value == 0:
+            return
+        self._underlineAni.stop()
+        self._underlineAni.setStartValue(value)
+        self._underlineAni.setEndValue(self.width())
+        self._underlineAni.start()
+
+    underlineValue = Property(float, getUnderlineValue, setUnderlineValue)
+    titlePosValue = Property(QPoint, getTextPos, setTextPos)

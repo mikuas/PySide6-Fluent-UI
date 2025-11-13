@@ -1,63 +1,54 @@
 # coding:utf-8
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit
-from PySide6.QtGui import QColor, QPainter, QPen, QFontMetrics
-from PySide6.QtCore import Qt, QPropertyAnimation, Property, QParallelAnimationGroup, QEasingCurve, QPoint
+from typing import Union
 
-from PySide6FluentUI import FluentStyleSheet, LineEditMenu, LineEditButton, FluentIcon
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QCompleter
+from PySide6.QtGui import QColor, QPainter, QPen, QFontMetrics, QPainterPath, QFont, QAction, QIcon, QPalette
+from PySide6.QtCore import Qt, QPropertyAnimation, Property, QParallelAnimationGroup, QEasingCurve, QPoint, QTimer
+
+from PySide6FluentUI import FluentStyleSheet, LineEditMenu, LineEditButton, FluentIcon, FillPushButton, themeColor, \
+    setFont, getFont, LineEdit, MotionLineEdit, FocusLineEdit
+from PySide6FluentUI.common.color import autoFallbackThemeColor
+from examples.window.splitWidget.demo import Interface
+
+"""
+
+FocusLineEdit
+MotionLineEdit
+
+"""
+
+class T_FocusLineEdit(LineEdit):
+
+    def paintEvent(self, e):
+        QLineEdit.paintEvent(self, e)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        pen = QPen(self.focusedBorderColor() if self.hasFocus() else autoFallbackThemeColor(QColor(0, 0, 0, 32), QColor(255, 255, 255, 32)))
+        pen.setWidth(2)
+        painter.setPen(pen)
+        painter.setBrush(Qt.NoBrush)
+        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)
 
 
-class CustomLineEdit(QLineEdit):
-    def __init__(self, parent=None):
+class T_MotionLineEdit(T_FocusLineEdit):
+    def __init__(self, title: str = "", parent=None):
         super().__init__(parent)
-        self._titleText: str = ""
+        self._titleText: str = title
         self._placeholderText: str = ""
         self._underlineValue: int = 0
-        self._textXPos: int = 0
-        self._isValidationError: bool = False
-        self._isClearButtonEnabled: bool = False
-        self.hBoxLayout: QHBoxLayout = QHBoxLayout(self)
-        self.clearButton: LineEditButton = LineEditButton(FluentIcon.CLOSE, self)
-
-        self.clearButton.setFixedSize(29, 25)
-        self.clearButton.hide()
-
-        self.hBoxLayout.setSpacing(3)
-        self.hBoxLayout.setContentsMargins(4, 4, 4, 4)
-        self.hBoxLayout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self.hBoxLayout.addWidget(self.clearButton, 0, Qt.AlignRight)
-
-        self.clearButton.clicked.connect(self.clear)
-        self.textChanged.connect(self.__onTextChanged)
+        self._textPos: QPoint = QPoint()
+        self.setFixedHeight(34)
         self.__initAnimation()
-        FluentStyleSheet.LINE_EDIT.apply(self)
 
     def __initAnimation(self):
         self._underlineAni: QPropertyAnimation = QPropertyAnimation(self, b"underlineValue")
-        self._titleXPosAni: QPropertyAnimation = QPropertyAnimation(self, b"titleXPosValue")
+        self._titlePosAni: QPropertyAnimation = QPropertyAnimation(self, b"titlePosValue")
 
-        self._underlineAni.setEasingCurve(QEasingCurve.Type.InOutCubic)
-        self._underlineAni.setDuration(500)
-        self._titleXPosAni.setEasingCurve(QEasingCurve.Type.InOutBack)
-        self._titleXPosAni.setDuration(400)
-
-    def setClearButtonEnabled(self, enable: bool):
-        self._isClearButtonEnabled = enable
-        self._adjustTextMargins()
-
-    def isClearButtonEnabled(self) -> bool:
-        return self._isClearButtonEnabled
-
-    def _adjustTextMargins(self):
-        m = self.textMargins()
-        self.setTextMargins(0, m.top(), 28, m.bottom())
-
-    def isValidationError(self) -> bool:
-        return self._isValidationError
-
-    def setValidationValue(self, value: bool):
-        self._isValidationError = value
-        self.update()
+        self._underlineAni.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._underlineAni.setDuration(300)
+        self._titlePosAni.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._titlePosAni.setDuration(400)
 
     def getUnderlineValue(self) -> int:
         return self._underlineValue
@@ -66,11 +57,11 @@ class CustomLineEdit(QLineEdit):
         self._underlineValue = value
         self.update()
 
-    def getTextXPos(self) -> int:
-        return self._textXPos
+    def getTextPos(self) -> QPoint:
+        return self._textPos
 
-    def setTextXPos(self, x: int) -> None:
-        self._textXPos = x
+    def setTextPos(self, pos: QPoint) -> None:
+        self._textPos = pos
 
     def setTitle(self, title: str) -> None:
         if title == self._titleText:
@@ -82,77 +73,75 @@ class CustomLineEdit(QLineEdit):
         return self._titleText
 
     def setPlaceholderText(self, text: str):
+        if text == self._placeholderText:
+            return
         self._placeholderText = text
         self.update()
 
     def placeholderText(self) -> str:
         return self._placeholderText
 
-    def contextMenuEvent(self, e):
-        LineEditMenu(self).exec(e.globalPos(), ani=True)
-
     def paintEvent(self, e):
-        super().paintEvent(e)
+        QLineEdit.paintEvent(self, e)
         x = self.width()
-        y = self.height() - 16
+        y = self.height() - 18
 
         painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
         painter.setBrush(Qt.NoBrush)
-        pen = QPen(QColor(0, 0, 0, 96), 3)
+        alpha = 128 if self.isEnabled() else 64
+        pen = QPen(autoFallbackThemeColor(QColor(0, 0, 0, alpha), QColor(255, 255, 255, alpha)), 1.5)
         painter.setPen(pen)
         painter.drawLine(0, y, x, y)
 
-        value = self.getUnderlineValue()
-        if value > 0:
-            pen.setBrush(QColor(255, 0, 0))
-            painter.setPen(pen)
-            painter.drawLine(0, y, value, y)
+        """ draw placeholder text """
+        self._drawPlaceholderText(painter, pen)
 
-        if self.isValidationError():
-            pen.setBrush(QColor(255, 0, 0))
-        else:
-            pen.setBrush(QColor(0, 0, 0, 114))
-        painter.setPen(pen)
-        painter.drawText(self.rect(), self.placeholderText(), Qt.AlignBottom)
+        """ draw title """
+        self._drawTitle(painter, pen)
 
-        pen.setBrush(QColor(0, 0, 0, 114))
-        painter.setPen(pen)
-        font = self.font()
-        font.setPixelSize(16)
-        painter.setFont(font)
-        painter.drawText(self.rect().adjusted(5, 0, 0, -self.getTextXPos()), self.title(), Qt.AlignVCenter)
+        """ draw focus line """
+        self._drawFocusLine(painter, pen, y)
 
     def focusOutEvent(self, e):
         super().focusOutEvent(e)
-        self.clearButton.hide()
-        self._changeAniValue(self.getUnderlineValue(), 0, self.getTextXPos(), 0)
+        self._changeAniValue(self.getUnderlineValue(), 0, self.getTextPos(), QPoint(29 * len(self.actions()), 0))
 
     def focusInEvent(self, e):
         super().focusInEvent(e)
-        if self.isClearButtonEnabled():
-            self.clearButton.setVisible(bool(self.text()))
-        self._changeAniValue(0, self.width(), 0, self.height() - 15)
+        self._changeAniValue(0, self.width(), QPoint(29 * len(self.actions()), 0), QPoint(0, self.height() - 19))
 
-    def _changeAniValue(self, usv: int, uev: int, tsv: int, tev: int):
+    def _drawFocusLine(self, painter: QPainter, pen: QPen, y: int):
+        value = self.getUnderlineValue()
+        if value > 0:
+            pen.setWidthF(2.5)
+            pen.setBrush(self.focusedBorderColor())
+            painter.setPen(pen)
+            painter.drawLine(0, y, value, y)
+
+    def _drawPlaceholderText(self, painter: QPainter, pen: QPen):
+        if self.hasFocus():
+            painter.setPen(pen)
+            painter.setFont(getFont(14))
+            painter.drawText(self.rect(), self.placeholderText(), Qt.AlignBottom)
+
+    def _drawTitle(self, painter: QPainter, pen: QPen):
+        painter.setPen(pen)
+        painter.setFont(getFont(16))
+        pos = self.getTextPos()
+        painter.drawText(self.rect().adjusted(5 + pos.x(), 0, 5, -pos.y()), self.title(), Qt.AlignVCenter)
+
+    def _changeAniValue(self, usv: int, uev: int, tsp: QPoint, tep: QPoint):
         self._underlineAni.stop()
-        self._titleXPosAni.stop()
+        self._titlePosAni.stop()
 
-        if not self.isValidationError():
-            self._underlineAni.setStartValue(usv)
-            self._underlineAni.setEndValue(uev)
-            self._underlineAni.start()
+        self._underlineAni.setStartValue(usv)
+        self._underlineAni.setEndValue(uev)
+        self._underlineAni.start()
         if not self.text():
-            self._titleXPosAni.setStartValue(tsv)
-            self._titleXPosAni.setEndValue(tev)
-            self._titleXPosAni.start()
-
-    def __onTextChanged(self, text):
-        """ text changed slot """
-        if self.isClearButtonEnabled():
-            self.clearButton.setVisible(bool(text) and self.hasFocus())
-
-    underlineValue = Property(int, getUnderlineValue, setUnderlineValue)
-    titleXPosValue = Property(int, getTextXPos, setTextXPos)
+            self._titlePosAni.setStartValue(tsp)
+            self._titlePosAni.setEndValue(tep)
+            self._titlePosAni.start()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -164,50 +153,50 @@ class CustomLineEdit(QLineEdit):
         self._underlineAni.setEndValue(self.width())
         self._underlineAni.start()
 
+    underlineValue = Property(int, getUnderlineValue, setUnderlineValue)
+    titlePosValue = Property(QPoint, getTextPos, setTextPos)
 
-class MainWindow(QWidget):
+
+class MainWindow(Interface):
+# class MainWindow(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         self.viewLayout: QVBoxLayout = QVBoxLayout(self)
 
-        self.userNameEdit: CustomLineEdit = CustomLineEdit(self)
-        self.passwordEdit: CustomLineEdit = CustomLineEdit(self)
+        self.userNameEdit: MotionLineEdit = MotionLineEdit("用户名", self)
+        self.passwordEdit: MotionLineEdit = MotionLineEdit("密码", self)
+        self.phoneEdit: MotionLineEdit = MotionLineEdit("手机号", self)
+        self.fe: FocusLineEdit = FocusLineEdit(self)
+        self.submitButton: FillPushButton = FillPushButton("提交", self)
 
-        self.userNameEdit.setTitle("用户名")
         self.userNameEdit.setPlaceholderText("请输入用户名")
-        self.passwordEdit.setTitle("密码")
         self.passwordEdit.setPlaceholderText("请输入密码")
+        self.phoneEdit.setPlaceholderText("请输入手机号")
+        self.fe.setPlaceholderText("None")
 
         self.viewLayout.addWidget(self.userNameEdit)#, 0, Qt.AlignmentFlag.AlignCenter)
         self.viewLayout.addWidget(self.passwordEdit)#, 0, Qt.AlignmentFlag.AlignCenter)
+        self.viewLayout.addWidget(self.phoneEdit)#, 0, Qt.AlignmentFlag.AlignCenter)
+        self.viewLayout.addWidget(self.fe)#, 0, Qt.AlignmentFlag.AlignCenter)
 
+        self.userNameEdit.setClearButtonEnabled(True)
         self.passwordEdit.setClearButtonEnabled(True)
-        self.userNameEdit.textChanged.connect(
-            lambda text: {
-                (
-                    self.userNameEdit.setPlaceholderText("用户名已存在!"),
-                    self.userNameEdit.setValidationValue(True)
-                ) if text == "interval" else
-                (
-                    self.userNameEdit.setPlaceholderText("请输入用户名"),
-                    self.userNameEdit.setValidationValue(False)
-                )
-            }
-        )
-        self.passwordEdit.textChanged.connect(
-            lambda text: {
-                (
-                    self.passwordEdit.setPlaceholderText("密码已存在!"),
-                    self.passwordEdit.setValidationValue(True)
-                ) if text == "114514" else
-                (
-                    self.passwordEdit.setPlaceholderText("请输入密码"),
-                    self.passwordEdit.setValidationValue(False)
-                )
-            }
-        )
+        self.phoneEdit.setClearButtonEnabled(True)
+        self.fe.setClearButtonEnabled(True)
 
+        items = ["Interval", "Int", "Im", "Is"]
+        completer = QCompleter(items, self)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer.setFilterMode(Qt.MatchContains)
+        self.userNameEdit.setCompleter(completer)
+        self.passwordEdit.setCompleter(completer)
+        self.phoneEdit.setCompleter(completer)
+        self.fe.setCompleter(completer)
+
+        self.submitButton.setFillColor("#c6eeb0")
+        self.viewLayout.addWidget(self.submitButton)
+        self.userNameEdit.setEnabled(False)
+        self.connectSignalSlot()
 
 def main():
     app = QApplication(sys.argv)

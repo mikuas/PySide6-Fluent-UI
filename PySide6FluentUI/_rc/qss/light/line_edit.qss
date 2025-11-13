@@ -4,7 +4,6 @@ LineEdit, TextEdit, PlainTextEdit, TextBrowser {
     border: 1px solid rgba(0, 0, 0, 13);
     border-bottom: 1px solid rgba(0, 0, 0, 100);
     border-radius: 5px;
-    /* font: 14px "Segoe UI", "Microsoft YaHei"; */
     padding: 0px 10px;
     selection-background-color: --ThemeColorLight1;
 }
@@ -58,37 +57,43 @@ TextBrowser:disabled {
 
 FocusLineEdit {
     border: none;
-    outline: none;
     border-bottom: none;
-    border-radius: 12px;
-}
-
-FocusLineEdit:hover {
-    border: none;
-    outline: none;
-    border-bottom: none;
+    border-radius: 8px;
 }
 
 FocusLineEdit:focus {
-    border: none;
-    outline: none;
     border-bottom: none;
 }
 
-FocusLineEdit:disabled {
-    border: none;
-    outline: none;
+FocusLineEdit:hover {
     border-bottom: none;
+    border: none;
 }
 
-CustomLineEdit {
+MotionLineEdit {
+    color: black;
+    border-radius: 6px;
     border: none;
     outline: none;
-    padding: 0px;
-    padding-top: 14px;
-    padding-bottom: 15px;
+    padding: 14px 5px 16px 5px;
     background: transparent;
-    min-height: 28px;
-    max-height: 28px;
-    selection-background-color: --ThemeColorLight1;
+    min-height: 32px;
+    max-height: 32px;
+}
+
+MotionLineEdit:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-bottom: none;
+}
+
+MotionLineEdit:focus {
+    background: rgba(255, 255, 255, 0.8)
+    border-bottom: none;
+}
+
+MotionLineEdit:disabled {
+    background: transparent;
+    border: none;
+    border-bottom: none;
 }

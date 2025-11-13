@@ -87,10 +87,9 @@ class Pager(QWidget):
         setToolTipInfos(
             [self.topButton, self.bottomButton, self.previousButton, self.nextButton],
             ["跳转到第一页", "跳转到最后一页", "上一页", "下一页"],
-            200,
+            2500,
             ToolTipPosition.TOP
         )
-        self.currentPageChanged.connect(lambda page: self.jumpEdit.setText(str(page)))
 
     def __initWidget(self):
         self.topLabel: BodyLabel = BodyLabel("...")
@@ -116,6 +115,9 @@ class Pager(QWidget):
         self.jumpEdit.setValidator(QIntValidator(self))
         self.jumpEdit.setAlignment(Qt.AlignCenter)
         self.jumpEdit.setFixedWidth(64)
+
+    def __onCurrentPageChanged(self, page):
+        self.jumpEdit.setText(str(page))
 
     def __jumpToTop(self):
         if self.__pages >= 1:
@@ -184,6 +186,7 @@ class Pager(QWidget):
         self.previousButton.clicked.connect(self.__onPreviousButton)
         self.nextButton.clicked.connect(self.__onNextButton)
         self.jumpEdit.returnPressed.connect(self.jumpToPage)
+        self.currentPageChanged.connect(self.__onCurrentPageChanged)
 
     def currentPage(self) -> int:
         return self.__currentPage

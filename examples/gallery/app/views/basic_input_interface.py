@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout
 from PySide6FluentUI import FluentIcon, RoundPushButton, RoundToolButton, FillPushButton, FillToolButton, \
     OutlinePushButton, OutlineToolButton, LabelLineEdit, PinBox, MultiSelectionComboBox, SwitchButton, \
     SubtitleRadioButton, ToolTipSlider, PushButton, FocusLineEdit, TogglePushButton, HyperlinkButton, \
-    PrimaryDropDownPushButton, RoundMenu, Action, PrimarySplitPushButton
+    PrimaryDropDownPushButton, RoundMenu, Action, PrimarySplitPushButton, MotionLineEdit
 
 from ..widgets.basic_interface import Interface
 
@@ -62,9 +62,17 @@ class BasicInputInterface(Interface):
         )
 
         """ round push button """
+        widget = QWidget()
+        widget.setLayout(QHBoxLayout())
+        widget.layout().setContentsMargins(0, 0, 0, 0)
+        self.roundPushButton1: RoundPushButton = RoundPushButton(FluentIcon.ACCEPT, "圆角按钮", self)
+        self.roundPushButton2: RoundPushButton = RoundPushButton("圆角按钮(radius: 8)", self)
+        self.roundPushButton2.setRadius(8, 8, 8, 8)
+        widget.layout().addWidget(self.roundPushButton1)
+        widget.layout().addWidget(self.roundPushButton2)
         self.addExamplesCard(
             "圆角按钮",
-            RoundPushButton(FluentIcon.ACCEPT, "圆角按钮", self)
+            widget
         )
 
         """ round tool button """
@@ -75,15 +83,47 @@ class BasicInputInterface(Interface):
         # self.roundToolButton.setFixedWidth(36)
 
         """ fill push button """
+        widget = QWidget()
+        widget.setLayout(QHBoxLayout())
+        widget.layout().setContentsMargins(0, 0, 0, 0)
+
+        self.fillPushButton1: FillPushButton = FillPushButton(FluentIcon.ACCEPT, "确定", self)
+        self.fillPushButton2: FillPushButton = FillPushButton(FluentIcon.CLOSE, "取消", self)
+        self.fillPushButton3: FillPushButton = FillPushButton(FluentIcon.SETTING, "设置", self)
+
+        self.fillPushButton2.setFillColor("#8fda69")
+        self.fillPushButton2.setTextColor("#fb8500", "#9d4edd")
+        self.fillPushButton3.setFillColor("#ff8081")
+        widget.layout().addWidget(self.fillPushButton1)
+        widget.layout().addWidget(self.fillPushButton2)
+        widget.layout().addWidget(self.fillPushButton3)
+
         self.addExamplesCard(
             "填充按钮",
-            FillPushButton(FluentIcon.HOME, "确定", self)
+            widget
         )
 
+        widget = QWidget()
+        widget.setLayout(QHBoxLayout())
+        widget.layout().setContentsMargins(0, 0, 0, 0)
+
+        self.fillToolButton1: FillToolButton = FillToolButton(FluentIcon.HOME, self)
+        self.fillToolButton2: FillToolButton = FillToolButton(FluentIcon.GITHUB, self)
+        self.fillToolButton3: FillToolButton = FillToolButton(FluentIcon.VIDEO, self)
+        self.fillToolButton4: FillToolButton = FillToolButton(FluentIcon.SETTING, self)
+
+        self.fillToolButton2.setFillColor("#8fda69")
+        self.fillToolButton2.setTextColor("#fb8500", "#9d4edd")
+        self.fillToolButton3.setFillColor("#ff8081")
+        self.fillToolButton4.setFillColor("#9d9d9d")
+        widget.layout().addWidget(self.fillToolButton1)
+        widget.layout().addWidget(self.fillToolButton2)
+        widget.layout().addWidget(self.fillToolButton3)
+        widget.layout().addWidget(self.fillToolButton4)
         """ fill tool button """
         self.addExamplesCard(
             "填充工具按钮",
-            FillToolButton(FluentIcon.HOME, self)
+            widget
         )
 
         """ switch button """
@@ -126,6 +166,32 @@ class BasicInputInterface(Interface):
         self.addExamplesCard(
             "焦点输入框",
             self.focusLineEdit
+        )
+
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        self.userNameMotionLineEdit: MotionLineEdit = MotionLineEdit("用户名", self)
+        self.passwdMotionLineEdit: MotionLineEdit = MotionLineEdit("密码", self)
+        self.phoneMotionLineEdit: MotionLineEdit = MotionLineEdit("手机号码", self)
+        self.emailMotionLineEdit: MotionLineEdit = MotionLineEdit("邮箱地址", self)
+
+        self.userNameMotionLineEdit.setPlaceholderText("请输入用户名")
+        self.passwdMotionLineEdit.setPlaceholderText("密码至少包含一位大写,小写字母,特殊符号及数字")
+        self.phoneMotionLineEdit.setPlaceholderText("请输入11位手机号")
+        self.emailMotionLineEdit.setPlaceholderText("请输入邮箱地址")
+        self.userNameMotionLineEdit.setFixedWidth(328)
+        self.passwdMotionLineEdit.setFixedWidth(328)
+        self.phoneMotionLineEdit.setFixedWidth(328)
+        self.emailMotionLineEdit.setFixedWidth(328)
+        widget.layout().setContentsMargins(12, 12, 12, 12)
+        widget.layout().addWidget(self.userNameMotionLineEdit)
+        widget.layout().addWidget(self.passwdMotionLineEdit)
+        widget.layout().addWidget(self.phoneMotionLineEdit)
+        widget.layout().addWidget(self.emailMotionLineEdit)
+        self.addExamplesCard(
+            "动态线编辑框",
+            widget,
+            1
         )
 
         self.addExamplesCard(

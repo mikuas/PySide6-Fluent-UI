@@ -76,19 +76,16 @@ MotionLineEdit {
     border: none;
     outline: none;
     padding: 14px 5px 16px 5px;
-    background: transparent;
     min-height: 32px;
     max-height: 32px;
 }
 
 MotionLineEdit:hover {
-    background: rgba(255, 255, 255, 0.8);
     border: none;
     border-bottom: none;
 }
 
 MotionLineEdit:focus {
-    background: rgba(255, 255, 255, 0.8)
     border-bottom: none;
 }
 

@@ -1193,6 +1193,7 @@ class FillButtonBase(RoundButtonBase): # New
         self._darkTextColor: QColor = QColor(0, 0, 0)
 
         self.setRadius(6, 6, 6, 6)
+        self._updateButtonTextPalette(self.textColor())
         # try:
         #     self.setFlat(True)
         # except AttributeError: ...

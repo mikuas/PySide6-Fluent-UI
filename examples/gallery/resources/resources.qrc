@@ -8,5 +8,7 @@
         <file>images/ATRI.jpg</file>
         <file>images/WeChat.png</file>
         <file>icons/app.ico</file>
+        <file>qss/dark/icon_interface.qss</file>
+        <file>qss/light/icon_interface.qss</file>
     </qresource>
 </RCC>

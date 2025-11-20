@@ -21,7 +21,6 @@ class ProgressToast(ToastInfoBar):
         self.__br: int = 0
         self.closeButton.setVisible(False)
         self.hBoxLayout.setContentsMargins(6, 6, 6, 16)
-        print(self.hBoxLayout.contentsMargins())
 
         self._progressAni: QPropertyAnimation = QPropertyAnimation(self, b'progress')
         self._progressAni.setStartValue(0)

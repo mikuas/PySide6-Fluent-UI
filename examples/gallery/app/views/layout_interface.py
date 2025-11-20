@@ -1,9 +1,9 @@
 # coding:utf-8
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QColor
 from PySide6.QtWidgets import QWidget
 
-from PySide6FluentUI import Splitter, themeColor, drawRoundRect
+from PySide6FluentUI import Splitter, themeColor, drawRoundRect, isDarkTheme
 
 from ..widgets.basic_interface import Interface
 
@@ -18,6 +18,12 @@ class BackgroundCard(QWidget):
         painter.setPen(Qt.NoPen)
         painter.setBrush(themeColor())
         drawRoundRect(painter, self.rect(), *self.radius)
+
+        painter.setPen(QColor(255, 255, 255) if isDarkTheme() else QColor(0, 0, 0))
+        font = self.font()
+        font.setPixelSize(16)
+        painter.setFont(font)
+        painter.drawText(self.rect(), "侧边栏", Qt.AlignCenter)
 
 
 class LayoutInterface(Interface):

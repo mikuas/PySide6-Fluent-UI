@@ -6,57 +6,89 @@ from PySide6.QtGui import QPainter, QPixmap, QPainterPath, QLinearGradient, QCol
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
 from PySide6FluentUI import SmoothScrollArea, addRoundPath, IconWidget, FluentIcon, SubtitleLabel, BodyLabel, \
-    isDarkTheme, TitleLabel
+    isDarkTheme, TitleLabel, CaptionLabel, FlowLayout
 
 from ..utils.url_utils import openUrl
 
 
-class LinkCark(QWidget):
-    def __init__(self, icon: Union[str, FluentIcon], title: str, content: str, url: Union[str, QUrl], parent: QWidget = None):
+class JumpCard(QWidget):
+    def __init__(self, icon: Union[str, FluentIcon], title: str, content: str, parent: QWidget = None):
         super().__init__(parent)
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self._isHover: bool = False
-        self._url: Union[str, QUrl] = url
-        self.boxLayout: QVBoxLayout = QVBoxLayout(self)
-
         self.iconWidget: IconWidget = IconWidget(icon, self)
-        self.titleLabel: SubtitleLabel = SubtitleLabel(title, self)
-        self.contentLabel: BodyLabel = BodyLabel(content, self)
+        self.titleLabel: BodyLabel = BodyLabel(title, self)
+        self.contentLabel: CaptionLabel = CaptionLabel(content, self)
+
+        self.contentLabel.setWordWrap(True)
+        self.iconWidget.setFixedSize(36, 36)
+        self.setFixedSize(300, 80)
+        self.initLayout()
+
+    def initLayout(self):
+        self.boxLayout: QHBoxLayout = QHBoxLayout(self)
+        self.textLayout: QVBoxLayout = QVBoxLayout()
+        self.boxLayout.setContentsMargins(16, 12, 12, 16)
+        self.textLayout.setContentsMargins(16, 0, 0, 0)
+        self.textLayout.setSpacing(2)
+
+        self.boxLayout.addWidget(self.iconWidget)
+        self.boxLayout.addLayout(self.textLayout, 1)
+        self.textLayout.addWidget(self.titleLabel, 0, Qt.AlignTop)
+        self.textLayout.addWidget(self.contentLabel, 0, Qt.AlignTop)
+
+    def enterEvent(self, event):
+        self._isHover = True
+        super().enterEvent(event)
+        self.update()
+
+    def leaveEvent(self, event):
+        self._isHover = False
+        super().leaveEvent(event)
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        if isDarkTheme():
+            pc = 255
+            bc = 32
+        else:
+            pc = 0
+            bc = 255
+        painter.setPen(QColor(pc, pc, pc, 24 if self._isHover else 16))
+        if self._isHover:
+            painter.setBrush(QColor(255, 255, 255, 21 if isDarkTheme() else 64))
+        else:
+            painter.setBrush(QColor(255, 255, 255, 13 if isDarkTheme() else 170))
+
+        painter.drawRoundedRect(self.rect().adjusted(1, 1, -1, -1), 8, 8)
+
+
+class LinkCark(JumpCard):
+    def __init__(self, icon: Union[str, FluentIcon], title: str, content: str, url: Union[str, QUrl], parent: QWidget = None):
+        super().__init__(icon, title, content, parent)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.linkIconWidget: IconWidget = IconWidget(FluentIcon.LINK, self)
+        self._url: Union[str, QUrl] = url
 
         self.iconWidget.setFixedSize(52, 52)
-        self.contentLabel.setWordWrap(True)
         self.titleLabel.setTextColor("black", "white")
         self.contentLabel.setTextColor("black", "white")
         self.linkIconWidget.setFixedSize(18, 18)
 
-        self.__initLayout()
+        self.boxLayout.addWidget(self.linkIconWidget, 0, Qt.AlignBottom | Qt.AlignRight)
         self.setFixedSize(200, 234)
 
-    def __initLayout(self):
+    def initLayout(self):
+        self.boxLayout: QVBoxLayout = QVBoxLayout(self)
         self.boxLayout.setContentsMargins(26, 26, 16, 16)
         self.boxLayout.addWidget(self.iconWidget, 0, Qt.AlignLeft | Qt.AlignTop)
         self.boxLayout.addWidget(self.titleLabel)
         self.boxLayout.addWidget(self.contentLabel)
-        self.boxLayout.addWidget(self.linkIconWidget, 0, Qt.AlignBottom | Qt.AlignRight)
 
     def mouseReleaseEvent(self, event):
         openUrl(self._url)
         super().mouseReleaseEvent(event)
-
-    def enterEvent(self, event):
-        self._setIsHover(True)
-        super().enterEvent(event)
-
-    def leaveEvent(self, event):
-        self._setIsHover(False)
-        super().leaveEvent(event)
-
-    def _setIsHover(self, isHover: bool):
-        if isHover == self._isHover:
-            return
-        self._isHover = isHover
-        self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -81,10 +113,25 @@ class HomeInterface(SmoothScrollArea):
         self.pixmap: QPixmap = QPixmap(":/gallery/images/mm.webp")
         self.linkLayout: QHBoxLayout = QHBoxLayout()
 
-        self.__initWidget()
+        self.__initCardWidget()
+
+        self.basicInputSamplesTitle: SubtitleLabel = SubtitleLabel("基本输入", self)
+        self.basicInputSamplesLayout: FlowLayout = FlowLayout()
+        self.buttonButtonCard: JumpCard = JumpCard(FluentIcon.HOME, "按钮", "A control that responds to user input and emit clicked signal.")
+        self.basicInputSamplesLayout.addWidget(self.buttonButtonCard)
+
+        self.dateTimeSamplesTitle: SubtitleLabel = SubtitleLabel("日期时间", self)
+        self.dateTimeSamplesLayout: FlowLayout = FlowLayout()
+
+        self.viewLayout.setSpacing(32)
+        self.viewLayout.addWidget(self.basicInputSamplesTitle)
+        self.viewLayout.addLayout(self.basicInputSamplesLayout)
+
+        self.viewLayout.addWidget(self.dateTimeSamplesTitle)
+
         self.viewLayout.addStretch(1)
 
-    def __initWidget(self):
+    def __initCardWidget(self):
         self.titleLabel: TitleLabel = TitleLabel("PySide6-Fluent-UI Gallery", self)
         self.titleLabel.setFontSize(48, QFont.DemiBold)
         self.__initLayout()

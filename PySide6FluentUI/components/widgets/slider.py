@@ -14,8 +14,8 @@ class SliderHandle(QWidget):
 
     pressed = Signal()
     released = Signal()
-    hover = Signal()
-    level = Signal()
+    # hover = Signal()
+    # level = Signal()
 
     def __init__(self, parent: QSlider):
         super().__init__(parent=parent)
@@ -42,11 +42,11 @@ class SliderHandle(QWidget):
 
     def enterEvent(self, e):
         self._startAni(6)
-        self.hover.emit()
+        # self.hover.emit()
 
     def leaveEvent(self, e):
         self._startAni(5)
-        self.level.emit()
+#         self.level.emit()
 
     def mousePressEvent(self, e):
         self._startAni(4)
@@ -360,8 +360,8 @@ class ToolTipSlider(Slider):
     def connectSignalSlot(self):
         self.__timer.timeout.connect(self._hideToolTipView)
         self.valueChanged.connect(self.__adjustToolTipPos)
-        self.handle.hover.connect(self.__onHoverHandle)
-        self.handle.level.connect(self._hideToolTipView)
+        # self.handle.hover.connect(self.__onHoverHandle)
+        # self.handle.level.connect(self._hideToolTipView)
 
     def _hideToolTipView(self):
         self.toolTipView.setVisible(False)

@@ -2,9 +2,10 @@
 import sys
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, Qt
 
-from PySide6FluentUI import FluentWindow, FluentIcon, NavigationItemPosition, FluentTranslator
+from PySide6FluentUI import FluentWindow, FluentIcon, NavigationItemPosition, FluentTranslator, TransparentToolButton, \
+    toggleTheme
 
 from .views.home_interface import HomeInterface
 from .views.icon_interface import IconInterface
@@ -25,6 +26,11 @@ class MainWindow(FluentWindow):
 
         self.translator: FluentTranslator = FluentTranslator()
         QApplication.installTranslator(self.translator)
+
+        self.toggleThemeButton: TransparentToolButton = TransparentToolButton(FluentIcon.CONSTRACT, self)
+        self.toggleThemeButton.clicked.connect(lambda: toggleTheme(True))
+        self.toggleThemeButton.setFixedSize(self.titleBar.maxBtn.size())
+        self.titleBar.hBoxLayout.insertWidget(3, self.toggleThemeButton, 0, Qt.AlignRight | Qt.AlignTop)
         
         self.homeInterface: HomeInterface = HomeInterface(self)
         self.iconInterface: IconInterface = IconInterface(self)
@@ -110,6 +116,7 @@ class MainWindow(FluentWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
+    app.setStyleSheet(window.styleSheet())
     window.resize(800, 520)
     window.show()
     sys.exit(app.exec())

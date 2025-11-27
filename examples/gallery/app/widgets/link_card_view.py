@@ -20,7 +20,7 @@ class LinkCard(SampleCard):
 
         self.iconWidget.setFixedSize(52, 52)
         self.titleLabel.setTextColor("black", "white")
-        self.contentLabel.setTextColor("black", "white")
+        self.contentLabel.setTextColor("gray", "white")
         self.linkIconWidget.setFixedSize(18, 18)
 
         self.boxLayout.addWidget(self.linkIconWidget, 0, Qt.AlignBottom | Qt.AlignRight)

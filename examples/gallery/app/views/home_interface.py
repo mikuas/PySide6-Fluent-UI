@@ -1,8 +1,9 @@
 # coding:utf-8
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
-from PySide6FluentUI import SmoothScrollArea, FluentIcon
+from PySide6FluentUI import SmoothScrollArea
 
 from ..widgets.sample_card_view import SampleCardView
 from ..widgets.banner_widget import BannerWidget
@@ -21,22 +22,22 @@ class HomeInterface(SmoothScrollArea):
     def __initSampleCardView(self):
         basicInputSampleView: SampleCardView = SampleCardView("Basic Input Samples", self)
         basicInputSampleView.addSampleCard(
-            FluentIcon.HOME,
+            QIcon(":/gallery/controls/Button.png"),
             "按钮",
             "一个响应用户输入并发出点击信号的控制器."
         )
         basicInputSampleView.addSampleCard(
-            FluentIcon.SETTING,
+            QIcon(":/gallery/controls/Button.png"),
             "Chip",
             "一个响应用户输入并发出点击信号的控制器."
         )
         basicInputSampleView.addSampleCard(
-            FluentIcon.HOME,
+            QIcon(":/gallery/controls/ComboBox.png"),
             "多选下拉框",
             "一个用户可选的下拉菜单."
         )
         basicInputSampleView.addSampleCard(
-            FluentIcon.SETTING,
+            QIcon(":/gallery/controls/Slider.png"),
             "滑块",
             "该控制键允许用户通过沿轨道移动拇指控制来从多个数值中选择."
         )
@@ -44,7 +45,7 @@ class HomeInterface(SmoothScrollArea):
 
         dateTimeSamplesView: SampleCardView = SampleCardView("Date&Time Sa,[;es", self)
         dateTimeSamplesView.addSampleCard(
-            FluentIcon.SETTING,
+            QIcon(":/gallery/controls/CalendarDatePicker.png"),
             "日历选择器",
             "一个允许用户通过日历选择日期值的控件."
         )
@@ -52,12 +53,12 @@ class HomeInterface(SmoothScrollArea):
 
         dialogSamplesView: SampleCardView = SampleCardView("Dialog Samples", self)
         dialogSamplesView.addSampleCard(
-            FluentIcon.LABEL,
+            QIcon(":/gallery/controls/ColorPicker.png"),
             "下拉调色板",
             "一个允许用户选择颜色的下拉调色板."
         )
         dialogSamplesView.addSampleCard(
-            FluentIcon.MUSIC,
+            QIcon(":/gallery/controls/RelativePanel.png"),
             "浮出控件对话框",
             "一个允许自定义布局的飞出对话框."
         )
@@ -65,7 +66,7 @@ class HomeInterface(SmoothScrollArea):
 
         layoutSamplesView: SampleCardView = SampleCardView("Layout Samples", self)
         layoutSamplesView.addSampleCard(
-            FluentIcon.SEND,
+            QIcon(":/gallery/controls/SplitView.png"),
             "拆分器",
             "一个允许用户调整内部小部件大小的小部件."
         )
@@ -73,7 +74,7 @@ class HomeInterface(SmoothScrollArea):
 
         viewSamplesView: SampleCardView = SampleCardView("View Samples", self)
         viewSamplesView.addSampleCard(
-            FluentIcon.EDIT,
+            QIcon(":/gallery/controls/Grid.png"),
             "分页器",
             "一个控制功能，允许用户在页码无法直观显示时，在分页集合中导航."
         )

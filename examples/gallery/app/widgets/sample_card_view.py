@@ -2,10 +2,10 @@
 from typing import Union
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter, QColor, QIcon
+from PySide6.QtGui import QPainter, QColor, QIcon, QFont
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFrame
 
-from PySide6FluentUI import IconWidget, FluentIcon, BodyLabel, isDarkTheme, CaptionLabel, FlowLayout, SubtitleLabel
+from PySide6FluentUI import IconWidget, FluentIcon, isDarkTheme, CaptionLabel, FlowLayout, SubtitleLabel
 
 
 class SampleCard(QFrame):
@@ -13,11 +13,13 @@ class SampleCard(QFrame):
         super().__init__(parent)
         self._isHover: bool = False
         self.iconWidget: IconWidget = IconWidget(icon, self)
-        self.titleLabel: BodyLabel = BodyLabel(title, self)
+        self.titleLabel: SubtitleLabel = SubtitleLabel(title, self)
         self.contentLabel: CaptionLabel = CaptionLabel(content, self)
 
         self.contentLabel.setWordWrap(True)
-        self.iconWidget.setFixedSize(36, 36)
+        self.titleLabel.setFontSize(15, QFont.Weight.Bold)
+        self.contentLabel.setTextColor("gray", "white")
+        self.iconWidget.setFixedSize(42, 42)
         self.setFixedSize(300, 80)
         self.initLayout()
 
@@ -47,7 +49,7 @@ class SampleCard(QFrame):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         pc = 255 if isDarkTheme() else 0
-        painter.setPen(QColor(pc, pc, pc, 24 if self._isHover else 16))
+        painter.setPen(QColor(pc, pc, pc, 24 if self._isHover else 12))
         if self._isHover:
             painter.setBrush(QColor(255, 255, 255, 21 if isDarkTheme() else 64))
         else:
@@ -68,5 +70,5 @@ class SampleCardView(QWidget):
         self.viewLayout.setContentsMargins(36, 0, 0, 0)
         self.flowLayout.setContentsMargins(0, 0, 0, 24)
 
-    def addSampleCard(self, icon: Union[Union[str, FluentIcon], FluentIcon], title: str, content: str):
+    def addSampleCard(self, icon: Union[str, QIcon, FluentIcon], title: str, content: str):
         self.flowLayout.addWidget(SampleCard(icon, title, content, self))

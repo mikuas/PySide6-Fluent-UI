@@ -1,14 +1,11 @@
 # coding:utf-8
-import json
-from pathlib import Path
-
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout
 
 from PySide6FluentUI import FluentIcon, RoundPushButton, RoundToolButton, FillPushButton, FillToolButton, \
     OutlinePushButton, OutlineToolButton, LabelLineEdit, PinBox, MultiSelectionComboBox, SwitchButton, \
     SubtitleRadioButton, ToolTipSlider, PushButton, FocusLineEdit, TogglePushButton, HyperlinkButton, \
-    PrimaryDropDownPushButton, RoundMenu, Action, PrimarySplitPushButton, MotionLineEdit
+    PrimaryDropDownPushButton, RoundMenu, Action, PrimarySplitPushButton
 
 from ..widgets.basic_interface import Interface
 
@@ -168,31 +165,31 @@ class BasicInputInterface(Interface):
             self.focusLineEdit
         )
 
-        widget = QWidget()
-        widget.setLayout(QVBoxLayout())
-        self.userNameMotionLineEdit: MotionLineEdit = MotionLineEdit("用户名", self)
-        self.passwdMotionLineEdit: MotionLineEdit = MotionLineEdit("密码", self)
-        self.phoneMotionLineEdit: MotionLineEdit = MotionLineEdit("手机号码", self)
-        self.emailMotionLineEdit: MotionLineEdit = MotionLineEdit("邮箱地址", self)
-
-        self.userNameMotionLineEdit.setPlaceholderText("请输入用户名")
-        self.passwdMotionLineEdit.setPlaceholderText("密码至少包含一位大写,小写字母,特殊符号及数字")
-        self.phoneMotionLineEdit.setPlaceholderText("请输入11位手机号")
-        self.emailMotionLineEdit.setPlaceholderText("请输入邮箱地址")
-        self.userNameMotionLineEdit.setFixedWidth(328)
-        self.passwdMotionLineEdit.setFixedWidth(328)
-        self.phoneMotionLineEdit.setFixedWidth(328)
-        self.emailMotionLineEdit.setFixedWidth(328)
-        widget.layout().setContentsMargins(12, 12, 12, 12)
-        widget.layout().addWidget(self.userNameMotionLineEdit)
-        widget.layout().addWidget(self.passwdMotionLineEdit)
-        widget.layout().addWidget(self.phoneMotionLineEdit)
-        widget.layout().addWidget(self.emailMotionLineEdit)
-        self.addExamplesCard(
-            "动态线编辑框",
-            widget,
-            1
-        )
+        # widget = QWidget()
+        # widget.setLayout(QVBoxLayout())
+        # self.userNameMotionLineEdit: MotionLineEdit = MotionLineEdit("用户名", self)
+        # self.passwdMotionLineEdit: MotionLineEdit = MotionLineEdit("密码", self)
+        # self.phoneMotionLineEdit: MotionLineEdit = MotionLineEdit("手机号码", self)
+        # self.emailMotionLineEdit: MotionLineEdit = MotionLineEdit("邮箱地址", self)
+        #
+        # self.userNameMotionLineEdit.setPlaceholderText("请输入用户名")
+        # self.passwdMotionLineEdit.setPlaceholderText("密码至少包含一位大写,小写字母,特殊符号及数字")
+        # self.phoneMotionLineEdit.setPlaceholderText("请输入11位手机号")
+        # self.emailMotionLineEdit.setPlaceholderText("请输入邮箱地址")
+        # self.userNameMotionLineEdit.setFixedWidth(328)
+        # self.passwdMotionLineEdit.setFixedWidth(328)
+        # self.phoneMotionLineEdit.setFixedWidth(328)
+        # self.emailMotionLineEdit.setFixedWidth(328)
+        # widget.layout().setContentsMargins(12, 12, 12, 12)
+        # widget.layout().addWidget(self.userNameMotionLineEdit)
+        # widget.layout().addWidget(self.passwdMotionLineEdit)
+        # widget.layout().addWidget(self.phoneMotionLineEdit)
+        # widget.layout().addWidget(self.emailMotionLineEdit)
+        # self.addExamplesCard(
+        #     "动态线编辑框",
+        #     widget,
+        #     1
+        # )
 
         self.addExamplesCard(
             "PIN码输入框",
@@ -202,9 +199,34 @@ class BasicInputInterface(Interface):
         self.multiSelectionComboBox: MultiSelectionComboBox = MultiSelectionComboBox(self, "Select You GirlFriend")
         self.multiSelectionComboBox.setFixedWidth(414)
 
-        PATH = Path(__file__).resolve().parents[2] / "resources" / "json" / "data.json"
-        with PATH.open("r", encoding="utf-8") as f:
-            self.multiSelectionComboBox.addItems(json.load(f)["girlFriend"])
+        self.multiSelectionComboBox.addItems([
+                "绫地宁宁",
+                "因幡爱瑠",
+                "椎叶䌷",
+                "亚托莉",
+                "朝武芳乃",
+                "丛雨",
+                "常陆茉子",
+                "上坂茅羽耶",
+                "矢来美羽",
+                "在原七海",
+                "三司绫濑",
+                "式部茉优",
+                "二条院羽月",
+                "和泉妃爱",
+                "常盘华乃",
+                "镰仓诗樱",
+                "结城明日奈",
+                "小鸟游六花",
+                "御坂美琴",
+                "佐天泪子",
+                "后藤一里",
+                "山田凉",
+                "伊地知虹夏",
+                "喜多郁代",
+                "锦亚澄",
+                "圣莉莉子"
+        ])
         self.addExamplesCard(
             "多选下拉框",
             self.multiSelectionComboBox

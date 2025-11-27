@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QSizePolicy, QWidget, QHBoxLayout
 from PySide6FluentUI import PopupDrawerWidget, PopupDrawerPosition, PushButton, DropDownColorPalette, ScreenColorPicker, \
     FlyoutDialog, StrongBodyLabel, BodyLabel, TransparentToolButton, FluentIcon, HorizontalSeparator, HBoxLayout, \
     SwitchButton, FlyoutPosition, PrimaryPushButton, ComboBox, ToastInfoBar, ToastInfoBarPosition, \
-    FocusLineEdit, Dialog
+    FocusLineEdit
 
 from ..widgets.basic_interface import Interface
 

@@ -16,6 +16,8 @@
 
 </div>
 
+![gallery](examples/gallery/resources/images/gallery.png)
+
 ## 安装🚀
 ```shell
 pip install PySide6-Fluent-UI -i https://pypi.org/simple/

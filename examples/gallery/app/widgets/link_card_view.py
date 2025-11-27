@@ -2,8 +2,8 @@
 from typing import Union
 
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QPainter, QColor, QIcon
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QFrame
+from PySide6.QtGui import QPainter, QColor
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
 from PySide6FluentUI import IconWidget, FluentIcon, isDarkTheme, SingleDirectionScrollArea
 

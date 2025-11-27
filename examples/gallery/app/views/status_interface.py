@@ -1,6 +1,4 @@
 # coding:utf-8
-import time
-
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget
 

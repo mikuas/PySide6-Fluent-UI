@@ -1,7 +1,7 @@
 # coding:utf-8
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QApplication
+from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from PySide6FluentUI import FluentIcon, SlidingNavigationBar, SlidingToolNavigationBar, InfoBadge, SubtitleLabel, \
     MenuBar, Action

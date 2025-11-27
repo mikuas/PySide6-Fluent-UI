@@ -16,7 +16,7 @@
 
 </div>
 
-![gallery](examples/gallery/resources/images/gallery.png)
+![gallery](docs/gallery.png)
 
 ## 安装🚀
 ```shell
